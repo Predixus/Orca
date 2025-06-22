@@ -1,21 +1,20 @@
 ---------------------- Core Operations ----------------------  
 -- name: CreateProcessorAndPurgeAlgos :exec
-WITH processor_insert AS (
-  INSERT INTO processor (
-    name,
-    runtime,
-    connection_string
-  ) VALUES (
-    sqlc.arg('name'),
-    sqlc.arg('runtime'),
-    sqlc.arg('connection_string')
-  ) ON CONFLICT (name, runtime) DO UPDATE 
-  SET 
-    name = EXCLUDED.name,
-    runtime = EXCLUDED.runtime,
-    connection_string = EXCLUDED.connection_string
-  RETURNING id
-)
+INSERT INTO processor (
+  name,
+  runtime,
+  connection_string
+) VALUES (
+  sqlc.arg('name'),
+  sqlc.arg('runtime'),
+  sqlc.arg('connection_string')
+) ON CONFLICT (name, runtime) DO UPDATE 
+SET 
+  name = EXCLUDED.name,
+  runtime = EXCLUDED.runtime,
+  connection_string = EXCLUDED.connection_string
+RETURNING id;
+
 -- name: CreateWindowType :exec
 INSERT INTO window_type (
   name, 

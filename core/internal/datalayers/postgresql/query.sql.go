@@ -121,46 +121,31 @@ func (q *Queries) CreateAlgorithmDependency(ctx context.Context, arg CreateAlgor
 }
 
 const createProcessorAndPurgeAlgos = `-- name: CreateProcessorAndPurgeAlgos :exec
-WITH processor_insert AS (
-  INSERT INTO processor (
-    name,
-    runtime,
-    connection_string
-  ) VALUES (
-    $1,
-    $3,
-    $4
-  ) ON CONFLICT (name, runtime) DO UPDATE 
-  SET 
-    name = EXCLUDED.name,
-    runtime = EXCLUDED.runtime,
-    connection_string = EXCLUDED.connection_string
-  RETURNING id
-)
-INSERT INTO window_type (
-  name, 
-  version
+INSERT INTO processor (
+  name,
+  runtime,
+  connection_string
 ) VALUES (
   $1,
-  $2
-) ON CONFLICT (name, version) DO NOTHING
+  $2,
+  $3
+) ON CONFLICT (name, runtime) DO UPDATE 
+SET 
+  name = EXCLUDED.name,
+  runtime = EXCLUDED.runtime,
+  connection_string = EXCLUDED.connection_string
+RETURNING id
 `
 
 type CreateProcessorAndPurgeAlgosParams struct {
 	Name             string
-	Version          string
 	Runtime          string
 	ConnectionString string
 }
 
 // -------------------- Core Operations ----------------------
 func (q *Queries) CreateProcessorAndPurgeAlgos(ctx context.Context, arg CreateProcessorAndPurgeAlgosParams) error {
-	_, err := q.db.Exec(ctx, createProcessorAndPurgeAlgos,
-		arg.Name,
-		arg.Version,
-		arg.Runtime,
-		arg.ConnectionString,
-	)
+	_, err := q.db.Exec(ctx, createProcessorAndPurgeAlgos, arg.Name, arg.Runtime, arg.ConnectionString)
 	return err
 }
 
@@ -203,6 +188,26 @@ func (q *Queries) CreateResult(ctx context.Context, arg CreateResultParams) (int
 	var id int64
 	err := row.Scan(&id)
 	return id, err
+}
+
+const createWindowType = `-- name: CreateWindowType :exec
+INSERT INTO window_type (
+  name, 
+  version
+) VALUES (
+  $1,
+  $2
+) ON CONFLICT (name, version) DO NOTHING
+`
+
+type CreateWindowTypeParams struct {
+	Name    string
+	Version string
+}
+
+func (q *Queries) CreateWindowType(ctx context.Context, arg CreateWindowTypeParams) error {
+	_, err := q.db.Exec(ctx, createWindowType, arg.Name, arg.Version)
+	return err
 }
 
 const readAlgorithmExecutionPaths = `-- name: ReadAlgorithmExecutionPaths :many
