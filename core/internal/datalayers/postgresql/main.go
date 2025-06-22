@@ -206,6 +206,7 @@ func (d *Datalayer) ReadWindowTypes(
 	return &windowTypesPb, tx.Commit(ctx)
 }
 
+// TODO - Add in dependencies
 func (d *Datalayer) ReadAlgorithms(
 	ctx context.Context,
 ) (*pb.Algorithms, error) {
@@ -232,12 +233,15 @@ func (d *Datalayer) ReadAlgorithms(
 
 	for ii, algorithm := range algorithms {
 		algorithmsPb.Algorithm[ii] = &pb.Algorithm{
-			Name:       algorithm.Name,
-			Version:    algorithm.Version,
-			WindowType: algorithm.WindowTypeID,
+			Name:    algorithm.Name,
+			Version: algorithm.Version,
+			WindowType: &pb.WindowType{
+				Name:    algorithm.WindowName,
+				Version: algorithm.WindowVersion,
+			},
 		}
 	}
-	return &windowTypesPb, tx.Commit(ctx)
+	return &algorithmsPb, tx.Commit(ctx)
 }
 
 func (d *Datalayer) ReadProcessors(
@@ -255,22 +259,22 @@ func (d *Datalayer) ReadProcessors(
 	pgTx := tx.(*PgTx)
 	qtx := d.queries.WithTx(pgTx.tx)
 
-	windowTypes, err := qtx.ReadWindowTypes(ctx)
+	processors, err := qtx.ReadProcessors(ctx)
 	if err != nil {
-		return &pb.WindowTypes{}, fmt.Errorf("could not read window types: %v", windowTypes)
+		return &pb.Processors{}, fmt.Errorf("could not read processors: %v", processors)
 	}
 
-	windowTypesPb := pb.WindowTypes{
-		Windows: make([]*pb.WindowType, len(windowTypes)),
+	processorsPb := pb.Processors{
+		Processor: make([]*pb.Processors_Processor, len(processors)),
 	}
 
-	for ii, window := range windowTypes {
-		windowTypesPb.Windows[ii] = &pb.WindowType{
-			Name:    window.Name,
-			Version: window.Version,
+	for ii, processor := range processors {
+		processorsPb.Processor[ii] = &pb.Processors_Processor{
+			Name:    processor.Name,
+			Runtime: processor.Runtime,
 		}
 	}
-	return &windowTypesPb, tx.Commit(ctx)
+	return &processorsPb, tx.Commit(ctx)
 }
 
 func (d *Datalayer) ReadResultsStats(

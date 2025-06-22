@@ -481,6 +481,10 @@ export interface ProcessorsRead {
 }
 
 export interface Processors {
+  processor?: Processors_Processor[] | undefined;
+}
+
+export interface Processors_Processor {
   name?: string | undefined;
   runtime?: string | undefined;
 }
@@ -2308,11 +2312,78 @@ export const ProcessorsRead: MessageFns<ProcessorsRead> = {
 };
 
 function createBaseProcessors(): Processors {
-  return { name: "", runtime: "" };
+  return { processor: [] };
 }
 
 export const Processors: MessageFns<Processors> = {
   encode(message: Processors, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.processor !== undefined && message.processor.length !== 0) {
+      for (const v of message.processor) {
+        Processors_Processor.encode(v!, writer.uint32(10).fork()).join();
+      }
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Processors {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProcessors();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          const el = Processors_Processor.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.processor!.push(el);
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Processors {
+    return {
+      processor: globalThis.Array.isArray(object?.processor)
+        ? object.processor.map((e: any) => Processors_Processor.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: Processors): unknown {
+    const obj: any = {};
+    if (message.processor?.length) {
+      obj.processor = message.processor.map((e) => Processors_Processor.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Processors>, I>>(base?: I): Processors {
+    return Processors.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Processors>, I>>(object: I): Processors {
+    const message = createBaseProcessors();
+    message.processor = object.processor?.map((e) => Processors_Processor.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseProcessors_Processor(): Processors_Processor {
+  return { name: "", runtime: "" };
+}
+
+export const Processors_Processor: MessageFns<Processors_Processor> = {
+  encode(message: Processors_Processor, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.name !== undefined && message.name !== "") {
       writer.uint32(10).string(message.name);
     }
@@ -2322,10 +2393,10 @@ export const Processors: MessageFns<Processors> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): Processors {
+  decode(input: BinaryReader | Uint8Array, length?: number): Processors_Processor {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseProcessors();
+    const message = createBaseProcessors_Processor();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -2354,14 +2425,14 @@ export const Processors: MessageFns<Processors> = {
     return message;
   },
 
-  fromJSON(object: any): Processors {
+  fromJSON(object: any): Processors_Processor {
     return {
       name: isSet(object.name) ? globalThis.String(object.name) : "",
       runtime: isSet(object.runtime) ? globalThis.String(object.runtime) : "",
     };
   },
 
-  toJSON(message: Processors): unknown {
+  toJSON(message: Processors_Processor): unknown {
     const obj: any = {};
     if (message.name !== undefined && message.name !== "") {
       obj.name = message.name;
@@ -2372,11 +2443,11 @@ export const Processors: MessageFns<Processors> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Processors>, I>>(base?: I): Processors {
-    return Processors.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<Processors_Processor>, I>>(base?: I): Processors_Processor {
+    return Processors_Processor.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<Processors>, I>>(object: I): Processors {
-    const message = createBaseProcessors();
+  fromPartial<I extends Exact<DeepPartial<Processors_Processor>, I>>(object: I): Processors_Processor {
+    const message = createBaseProcessors_Processor();
     message.name = object.name ?? "";
     message.runtime = object.runtime ?? "";
     return message;

@@ -220,12 +220,17 @@ class ProcessorsRead(_message.Message):
     def __init__(self) -> None: ...
 
 class Processors(_message.Message):
-    __slots__ = ("name", "runtime")
-    NAME_FIELD_NUMBER: _ClassVar[int]
-    RUNTIME_FIELD_NUMBER: _ClassVar[int]
-    name: str
-    runtime: str
-    def __init__(self, name: _Optional[str] = ..., runtime: _Optional[str] = ...) -> None: ...
+    __slots__ = ("processor",)
+    class Processor(_message.Message):
+        __slots__ = ("name", "runtime")
+        NAME_FIELD_NUMBER: _ClassVar[int]
+        RUNTIME_FIELD_NUMBER: _ClassVar[int]
+        name: str
+        runtime: str
+        def __init__(self, name: _Optional[str] = ..., runtime: _Optional[str] = ...) -> None: ...
+    PROCESSOR_FIELD_NUMBER: _ClassVar[int]
+    processor: _containers.RepeatedCompositeFieldContainer[Processors.Processor]
+    def __init__(self, processor: _Optional[_Iterable[_Union[Processors.Processor, _Mapping]]] = ...) -> None: ...
 
 class ResultsStatsRead(_message.Message):
     __slots__ = ()

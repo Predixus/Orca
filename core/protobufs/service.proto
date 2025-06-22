@@ -327,8 +327,11 @@ message Algorithms {
 message ProcessorsRead {}
 
 message Processors {
-  string name = 1;
-  string runtime = 2;
+  message Processor {
+    string name = 1;
+    string runtime = 2;
+  }
+  repeated Processor processor = 1;
 }
 
 message ResultsStatsRead {}
