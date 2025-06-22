@@ -204,3 +204,35 @@ class WindowTypes(_message.Message):
     WINDOWS_FIELD_NUMBER: _ClassVar[int]
     windows: _containers.RepeatedCompositeFieldContainer[WindowType]
     def __init__(self, windows: _Optional[_Iterable[_Union[WindowType, _Mapping]]] = ...) -> None: ...
+
+class AlgorithmsRead(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class Algorithms(_message.Message):
+    __slots__ = ("algorithm",)
+    ALGORITHM_FIELD_NUMBER: _ClassVar[int]
+    algorithm: _containers.RepeatedCompositeFieldContainer[Algorithm]
+    def __init__(self, algorithm: _Optional[_Iterable[_Union[Algorithm, _Mapping]]] = ...) -> None: ...
+
+class ProcessorsRead(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class Processors(_message.Message):
+    __slots__ = ("name", "runtime")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    RUNTIME_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    runtime: str
+    def __init__(self, name: _Optional[str] = ..., runtime: _Optional[str] = ...) -> None: ...
+
+class ResultsStatsRead(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class ResultsStats(_message.Message):
+    __slots__ = ("Count",)
+    COUNT_FIELD_NUMBER: _ClassVar[int]
+    Count: str
+    def __init__(self, Count: _Optional[str] = ...) -> None: ...

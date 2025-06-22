@@ -470,6 +470,28 @@ export interface WindowTypes {
   windows?: WindowType[] | undefined;
 }
 
+export interface AlgorithmsRead {
+}
+
+export interface Algorithms {
+  algorithm?: Algorithm[] | undefined;
+}
+
+export interface ProcessorsRead {
+}
+
+export interface Processors {
+  name?: string | undefined;
+  runtime?: string | undefined;
+}
+
+export interface ResultsStatsRead {
+}
+
+export interface ResultsStats {
+  Count?: string | undefined;
+}
+
 function createBaseWindow(): Window {
   return { timeFrom: "0", timeTo: "0", windowTypeName: "", windowTypeVersion: "", origin: "" };
 }
@@ -2132,6 +2154,336 @@ export const WindowTypes: MessageFns<WindowTypes> = {
   },
 };
 
+function createBaseAlgorithmsRead(): AlgorithmsRead {
+  return {};
+}
+
+export const AlgorithmsRead: MessageFns<AlgorithmsRead> = {
+  encode(_: AlgorithmsRead, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AlgorithmsRead {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAlgorithmsRead();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): AlgorithmsRead {
+    return {};
+  },
+
+  toJSON(_: AlgorithmsRead): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AlgorithmsRead>, I>>(base?: I): AlgorithmsRead {
+    return AlgorithmsRead.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AlgorithmsRead>, I>>(_: I): AlgorithmsRead {
+    const message = createBaseAlgorithmsRead();
+    return message;
+  },
+};
+
+function createBaseAlgorithms(): Algorithms {
+  return { algorithm: [] };
+}
+
+export const Algorithms: MessageFns<Algorithms> = {
+  encode(message: Algorithms, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.algorithm !== undefined && message.algorithm.length !== 0) {
+      for (const v of message.algorithm) {
+        Algorithm.encode(v!, writer.uint32(10).fork()).join();
+      }
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Algorithms {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAlgorithms();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          const el = Algorithm.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.algorithm!.push(el);
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Algorithms {
+    return {
+      algorithm: globalThis.Array.isArray(object?.algorithm)
+        ? object.algorithm.map((e: any) => Algorithm.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: Algorithms): unknown {
+    const obj: any = {};
+    if (message.algorithm?.length) {
+      obj.algorithm = message.algorithm.map((e) => Algorithm.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Algorithms>, I>>(base?: I): Algorithms {
+    return Algorithms.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Algorithms>, I>>(object: I): Algorithms {
+    const message = createBaseAlgorithms();
+    message.algorithm = object.algorithm?.map((e) => Algorithm.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseProcessorsRead(): ProcessorsRead {
+  return {};
+}
+
+export const ProcessorsRead: MessageFns<ProcessorsRead> = {
+  encode(_: ProcessorsRead, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProcessorsRead {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProcessorsRead();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): ProcessorsRead {
+    return {};
+  },
+
+  toJSON(_: ProcessorsRead): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ProcessorsRead>, I>>(base?: I): ProcessorsRead {
+    return ProcessorsRead.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ProcessorsRead>, I>>(_: I): ProcessorsRead {
+    const message = createBaseProcessorsRead();
+    return message;
+  },
+};
+
+function createBaseProcessors(): Processors {
+  return { name: "", runtime: "" };
+}
+
+export const Processors: MessageFns<Processors> = {
+  encode(message: Processors, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.name !== undefined && message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    if (message.runtime !== undefined && message.runtime !== "") {
+      writer.uint32(18).string(message.runtime);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Processors {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProcessors();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.runtime = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Processors {
+    return {
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      runtime: isSet(object.runtime) ? globalThis.String(object.runtime) : "",
+    };
+  },
+
+  toJSON(message: Processors): unknown {
+    const obj: any = {};
+    if (message.name !== undefined && message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.runtime !== undefined && message.runtime !== "") {
+      obj.runtime = message.runtime;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Processors>, I>>(base?: I): Processors {
+    return Processors.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Processors>, I>>(object: I): Processors {
+    const message = createBaseProcessors();
+    message.name = object.name ?? "";
+    message.runtime = object.runtime ?? "";
+    return message;
+  },
+};
+
+function createBaseResultsStatsRead(): ResultsStatsRead {
+  return {};
+}
+
+export const ResultsStatsRead: MessageFns<ResultsStatsRead> = {
+  encode(_: ResultsStatsRead, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ResultsStatsRead {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseResultsStatsRead();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): ResultsStatsRead {
+    return {};
+  },
+
+  toJSON(_: ResultsStatsRead): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ResultsStatsRead>, I>>(base?: I): ResultsStatsRead {
+    return ResultsStatsRead.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ResultsStatsRead>, I>>(_: I): ResultsStatsRead {
+    const message = createBaseResultsStatsRead();
+    return message;
+  },
+};
+
+function createBaseResultsStats(): ResultsStats {
+  return { Count: "" };
+}
+
+export const ResultsStats: MessageFns<ResultsStats> = {
+  encode(message: ResultsStats, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.Count !== undefined && message.Count !== "") {
+      writer.uint32(10).string(message.Count);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ResultsStats {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseResultsStats();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.Count = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ResultsStats {
+    return { Count: isSet(object.Count) ? globalThis.String(object.Count) : "" };
+  },
+
+  toJSON(message: ResultsStats): unknown {
+    const obj: any = {};
+    if (message.Count !== undefined && message.Count !== "") {
+      obj.Count = message.Count;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ResultsStats>, I>>(base?: I): ResultsStats {
+    return ResultsStats.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ResultsStats>, I>>(object: I): ResultsStats {
+    const message = createBaseResultsStats();
+    message.Count = object.Count ?? "";
+    return message;
+  },
+};
+
 /**
  * OrcaCore is the central orchestration service that:
  * - Manages the lifecycle of processing windows
@@ -2162,7 +2514,7 @@ export const OrcaCoreService = {
     responseSerialize: (value: WindowEmitStatus): Buffer => Buffer.from(WindowEmitStatus.encode(value).finish()),
     responseDeserialize: (value: Buffer): WindowEmitStatus => WindowEmitStatus.decode(value),
   },
-  /** Data operations */
+  /** ------------------- Data operations ------------------- */
   readWindowTypes: {
     path: "/OrcaCore/ReadWindowTypes",
     requestStream: false,
@@ -2172,6 +2524,33 @@ export const OrcaCoreService = {
     responseSerialize: (value: WindowTypes): Buffer => Buffer.from(WindowTypes.encode(value).finish()),
     responseDeserialize: (value: Buffer): WindowTypes => WindowTypes.decode(value),
   },
+  readAlgorithms: {
+    path: "/OrcaCore/ReadAlgorithms",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: AlgorithmsRead): Buffer => Buffer.from(AlgorithmsRead.encode(value).finish()),
+    requestDeserialize: (value: Buffer): AlgorithmsRead => AlgorithmsRead.decode(value),
+    responseSerialize: (value: Algorithms): Buffer => Buffer.from(Algorithms.encode(value).finish()),
+    responseDeserialize: (value: Buffer): Algorithms => Algorithms.decode(value),
+  },
+  readProcessors: {
+    path: "/OrcaCore/ReadProcessors",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ProcessorsRead): Buffer => Buffer.from(ProcessorsRead.encode(value).finish()),
+    requestDeserialize: (value: Buffer): ProcessorsRead => ProcessorsRead.decode(value),
+    responseSerialize: (value: Processors): Buffer => Buffer.from(Processors.encode(value).finish()),
+    responseDeserialize: (value: Buffer): Processors => Processors.decode(value),
+  },
+  readResultsStats: {
+    path: "/OrcaCore/ReadResultsStats",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ResultsStatsRead): Buffer => Buffer.from(ResultsStatsRead.encode(value).finish()),
+    requestDeserialize: (value: Buffer): ResultsStatsRead => ResultsStatsRead.decode(value),
+    responseSerialize: (value: ResultsStats): Buffer => Buffer.from(ResultsStats.encode(value).finish()),
+    responseDeserialize: (value: Buffer): ResultsStats => ResultsStats.decode(value),
+  },
 } as const;
 
 export interface OrcaCoreServer extends UntypedServiceImplementation {
@@ -2179,8 +2558,11 @@ export interface OrcaCoreServer extends UntypedServiceImplementation {
   registerProcessor: handleUnaryCall<ProcessorRegistration, Status>;
   /** Submit a window for processing */
   emitWindow: handleUnaryCall<Window, WindowEmitStatus>;
-  /** Data operations */
+  /** ------------------- Data operations ------------------- */
   readWindowTypes: handleUnaryCall<WindowTypeRead, WindowTypes>;
+  readAlgorithms: handleUnaryCall<AlgorithmsRead, Algorithms>;
+  readProcessors: handleUnaryCall<ProcessorsRead, Processors>;
+  readResultsStats: handleUnaryCall<ResultsStatsRead, ResultsStats>;
 }
 
 export interface OrcaCoreClient extends Client {
@@ -2216,7 +2598,7 @@ export interface OrcaCoreClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: WindowEmitStatus) => void,
   ): ClientUnaryCall;
-  /** Data operations */
+  /** ------------------- Data operations ------------------- */
   readWindowTypes(
     request: WindowTypeRead,
     callback: (error: ServiceError | null, response: WindowTypes) => void,
@@ -2231,6 +2613,51 @@ export interface OrcaCoreClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: WindowTypes) => void,
+  ): ClientUnaryCall;
+  readAlgorithms(
+    request: AlgorithmsRead,
+    callback: (error: ServiceError | null, response: Algorithms) => void,
+  ): ClientUnaryCall;
+  readAlgorithms(
+    request: AlgorithmsRead,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: Algorithms) => void,
+  ): ClientUnaryCall;
+  readAlgorithms(
+    request: AlgorithmsRead,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: Algorithms) => void,
+  ): ClientUnaryCall;
+  readProcessors(
+    request: ProcessorsRead,
+    callback: (error: ServiceError | null, response: Processors) => void,
+  ): ClientUnaryCall;
+  readProcessors(
+    request: ProcessorsRead,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: Processors) => void,
+  ): ClientUnaryCall;
+  readProcessors(
+    request: ProcessorsRead,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: Processors) => void,
+  ): ClientUnaryCall;
+  readResultsStats(
+    request: ResultsStatsRead,
+    callback: (error: ServiceError | null, response: ResultsStats) => void,
+  ): ClientUnaryCall;
+  readResultsStats(
+    request: ResultsStatsRead,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ResultsStats) => void,
+  ): ClientUnaryCall;
+  readResultsStats(
+    request: ResultsStatsRead,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ResultsStats) => void,
   ): ClientUnaryCall;
 }
 

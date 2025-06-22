@@ -197,12 +197,80 @@ func (d *Datalayer) ReadWindowTypes(
 		Windows: make([]*pb.WindowType, len(windowTypes)),
 	}
 
-	for _, window := range windowTypes {
-		windowTypesPb.Windows = append(windowTypesPb.Windows, &pb.WindowType{
+	for ii, window := range windowTypes {
+		windowTypesPb.Windows[ii] = &pb.WindowType{
 			Name:    window.Name,
 			Version: window.Version,
-		},
-		)
+		}
 	}
 	return &windowTypesPb, tx.Commit(ctx)
 }
+
+func (d *Datalayer) ReadAlgorithms(
+	ctx context.Context,
+) (*pb.WindowTypes, error) {
+	tx, err := d.WithTx(ctx)
+
+	defer tx.Rollback(ctx)
+
+	if err != nil {
+		slog.Error("could not start a transaction", "error", err)
+		return nil, err
+	}
+
+	pgTx := tx.(*PgTx)
+	qtx := d.queries.WithTx(pgTx.tx)
+
+	windowTypes, err := qtx.ReadWindowTypes(ctx)
+	if err != nil {
+		return &pb.WindowTypes{}, fmt.Errorf("could not read window types: %v", windowTypes)
+	}
+
+	windowTypesPb := pb.WindowTypes{
+		Windows: make([]*pb.WindowType, len(windowTypes)),
+	}
+
+	for ii, window := range windowTypes {
+		windowTypesPb.Windows[ii] = &pb.WindowType{
+			Name:    window.Name,
+			Version: window.Version,
+		}
+	}
+	return &windowTypesPb, tx.Commit(ctx)
+}
+
+func (d *Datalayer) ReadResultsStats(
+	ctx context.Context,
+) (*pb.WindowTypes, error) {
+	tx, err := d.WithTx(ctx)
+
+	defer tx.Rollback(ctx)
+
+	if err != nil {
+		slog.Error("could not start a transaction", "error", err)
+		return nil, err
+	}
+
+	pgTx := tx.(*PgTx)
+	qtx := d.queries.WithTx(pgTx.tx)
+
+	windowTypes, err := qtx.ReadWindowTypes(ctx)
+	if err != nil {
+		return &pb.WindowTypes{}, fmt.Errorf("could not read window types: %v", windowTypes)
+	}
+
+	windowTypesPb := pb.WindowTypes{
+		Windows: make([]*pb.WindowType, len(windowTypes)),
+	}
+
+	for ii, window := range windowTypes {
+		windowTypesPb.Windows[ii] = &pb.WindowType{
+			Name:    window.Name,
+			Version: window.Version,
+		}
+	}
+	return &windowTypesPb, tx.Commit(ctx)
+}
+
+func (d *Datalayer) ReadProcessors(
+

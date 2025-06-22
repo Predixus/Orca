@@ -1,3 +1,4 @@
+---------------------- Core Operations ----------------------  
 -- name: CreateProcessorAndPurgeAlgos :exec
 WITH processor_insert AS (
   INSERT INTO processor (
@@ -15,14 +16,6 @@ WITH processor_insert AS (
     connection_string = EXCLUDED.connection_string
   RETURNING id
 )
-  -- clean up old algorithm associations
-  DELETE FROM processor_algorithm
-  WHERE processor_id = (
-    SELECT id FROM processor p
-    WHERE p.name = sqlc.arg('name') 
-    AND p.runtime = sqlc.arg('runtime')
-);
-
 -- name: CreateWindowType :exec
 INSERT INTO window_type (
   name, 
@@ -183,6 +176,8 @@ FROM processor
 WHERE id = ANY(sqlc.arg('processor_ids')::bigint[])
 ORDER BY name, runtime;
 
+
+---------------------- Data operations ---------------------- 
 -- name: ReadWindowTypes :many
 SELECT
   id, 
@@ -191,3 +186,28 @@ SELECT
   created
 FROM window_type
 ORDER BY created DESC;
+
+-- name: ReadAlgorithms :many
+SELECT
+  id,
+  name,
+  version,
+  processor_id, 
+  window_type_id, 
+  created
+FROM algorithm
+ORDER BY processor_id, created DESC;
+
+-- name: ReadProcessors :many
+SELECT
+  id,
+  name, 
+  runtime, 
+  created
+FROM processor
+ORDER BY created DESC;
+
+-- name: ReadResultsStats :many
+SELECT
+  COUNT(t.id)
+FROM results t;
