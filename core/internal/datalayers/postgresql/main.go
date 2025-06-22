@@ -190,7 +190,7 @@ func (d *Datalayer) ReadWindowTypes(
 
 	windowTypes, err := qtx.ReadWindowTypes(ctx)
 	if err != nil {
-		return &pb.WindowTypes{}, fmt.Errorf("could not read window types: %v", windowTypes)
+		return &pb.WindowTypes{}, fmt.Errorf("could not read window types: %v", err)
 	}
 
 	windowTypesPb := pb.WindowTypes{
@@ -208,7 +208,41 @@ func (d *Datalayer) ReadWindowTypes(
 
 func (d *Datalayer) ReadAlgorithms(
 	ctx context.Context,
-) (*pb.WindowTypes, error) {
+) (*pb.Algorithms, error) {
+	tx, err := d.WithTx(ctx)
+
+	defer tx.Rollback(ctx)
+
+	if err != nil {
+		slog.Error("could not start a transaction", "error", err)
+		return nil, err
+	}
+
+	pgTx := tx.(*PgTx)
+	qtx := d.queries.WithTx(pgTx.tx)
+
+	algorithms, err := qtx.ReadAlgorithms(ctx)
+	if err != nil {
+		return &pb.Algorithms{}, fmt.Errorf("could not read algorithms: %v", err)
+	}
+
+	algorithmsPb := pb.Algorithms{
+		Algorithm: make([]*pb.Algorithm, len(algorithms)),
+	}
+
+	for ii, algorithm := range algorithms {
+		algorithmsPb.Algorithm[ii] = &pb.Algorithm{
+			Name:       algorithm.Name,
+			Version:    algorithm.Version,
+			WindowType: algorithm.WindowTypeID,
+		}
+	}
+	return &windowTypesPb, tx.Commit(ctx)
+}
+
+func (d *Datalayer) ReadProcessors(
+	ctx context.Context,
+) (*pb.Processors, error) {
 	tx, err := d.WithTx(ctx)
 
 	defer tx.Rollback(ctx)
@@ -241,7 +275,7 @@ func (d *Datalayer) ReadAlgorithms(
 
 func (d *Datalayer) ReadResultsStats(
 	ctx context.Context,
-) (*pb.WindowTypes, error) {
+) (*pb.ResultsStats, error) {
 	tx, err := d.WithTx(ctx)
 
 	defer tx.Rollback(ctx)
@@ -271,6 +305,3 @@ func (d *Datalayer) ReadResultsStats(
 	}
 	return &windowTypesPb, tx.Commit(ctx)
 }
-
-func (d *Datalayer) ReadProcessors(
-

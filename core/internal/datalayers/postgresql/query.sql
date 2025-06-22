@@ -189,14 +189,18 @@ ORDER BY created DESC;
 
 -- name: ReadAlgorithms :many
 SELECT
-  id,
-  name,
-  version,
-  processor_id, 
-  window_type_id, 
-  created
-FROM algorithm
-ORDER BY processor_id, created DESC;
+  a.id,
+  a.name,
+  a.version,
+  a.created,
+  w.name as window_name, 
+  w.version as window_version,
+  p.name as processor_name, 
+  p.runtime as processor_runtime
+FROM algorithm a
+  JOIN window_type w ON a.window_type_id = w.id
+  JOIN processor p ON a.processor_id = p.id
+ORDER BY a.processor_id, a.created DESC;
 
 -- name: ReadProcessors :many
 SELECT

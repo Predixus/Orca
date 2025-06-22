@@ -1,6 +1,5 @@
 CREATE EXTENSION ltree;
 
-
 -- Window types that can trigger algorithms
 CREATE TABLE window_type (
   id BIGSERIAL PRIMARY KEY,
