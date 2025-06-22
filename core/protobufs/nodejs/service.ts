@@ -70,23 +70,31 @@ export interface Window {
    * Time that the window starts - nanoseconds since epoch
    * Required: Must be > 0 and < to
    */
-  timeFrom: number;
+  timeFrom?:
+    | string
+    | undefined;
   /**
    * Time that the window ends - nanoseconds since epoch
    * Required: Must be > from
    */
-  timeTo: number;
+  timeTo?:
+    | string
+    | undefined;
   /**
    * The canonical name of the window that uniquely identifies it
    * This allows tracking of window state and results across the system
    * Required: Must be unique within the system, and refer directly to
    * window type
    */
-  windowTypeName: string;
+  windowTypeName?:
+    | string
+    | undefined;
   /** The version of the window type, as defined by WindoType */
-  windowTypeVersion: string;
+  windowTypeVersion?:
+    | string
+    | undefined;
   /** A unique identifier that defines where the window came from */
-  origin: string;
+  origin?: string | undefined;
 }
 
 /**
@@ -98,16 +106,18 @@ export interface WindowType {
    * Name of the window type - must be globally unique
    * Examples: "daily", "hourly", "market_close", "event_triggered"
    */
-  name: string;
+  name?:
+    | string
+    | undefined;
   /**
    * Version of the algorithm. Follows basic semver and allows window
    * types to be changed over time, with traceability
    */
-  version: string;
+  version?: string | undefined;
 }
 
 export interface WindowEmitStatus {
-  status: WindowEmitStatus_StatusEnum;
+  status?: WindowEmitStatus_StatusEnum | undefined;
 }
 
 /** A status enum that captures scenarios regarding a window being emmited */
@@ -162,16 +172,22 @@ export interface AlgorithmDependency {
    * Name of the required algorithm
    * Must reference an existing algorithm name in the system
    */
-  name: string;
+  name?:
+    | string
+    | undefined;
   /**
    * Version of the required algorithm
    * Must follow semantic versioning (e.g., "1.0.0")
    */
-  version: string;
+  version?:
+    | string
+    | undefined;
   /** Name of the processor that the algorithm is associated with */
-  processorName: string;
+  processorName?:
+    | string
+    | undefined;
   /** Runtime of the processor that the algorithm is associated with */
-  processorRuntime: string;
+  processorRuntime?: string | undefined;
 }
 
 /**
@@ -183,17 +199,21 @@ export interface Algorithm {
    * Name of the algorithm - must be globally unique
    * This identifies the algorithm across the system
    */
-  name: string;
+  name?:
+    | string
+    | undefined;
   /**
    * Version of the algorithm - must follow semantic versioning
    * Allows for algorithm evolution while maintaining compatibility
    */
-  version: string;
+  version?:
+    | string
+    | undefined;
   /**
    * Type of window that triggers this algorithm
    * References a WindowType that will cause this algorithm to execute
    */
-  windowType:
+  windowType?:
     | WindowType
     | undefined;
   /**
@@ -201,35 +221,37 @@ export interface Algorithm {
    * The algorithm won't execute until all dependencies have completed
    * Dependencies must not form cycles - this is statically checked on processor registration
    */
-  dependencies: AlgorithmDependency[];
+  dependencies?: AlgorithmDependency[] | undefined;
 }
 
 /** Container for array of float values */
 export interface FloatArray {
-  values: number[];
+  values?: number[] | undefined;
 }
 
 /** Result of an algorithm execution */
 export interface Result {
   /** Status of the result execution */
-  status: ResultStatus;
-  /** for single number results */
-  singleValue?:
-    | number
+  status?:
+    | ResultStatus
     | undefined;
-  /** For numeric array results */
-  floatValues?:
-    | FloatArray
-    | undefined;
-  /**
-   * For structured data results (JSON-like)
-   * Must follow a map<string, value> schema where value corresponds to https://protobuf.dev/reference/protobuf/google.protobuf/#value
-   */
-  structValue?:
-    | { [key: string]: any }
+  /** The actual result data - can be either an array of floats or a structured object */
+  resultData?:
+    | //
+    /** for single number results */
+    { $case: "singleValue"; value: number }
+    | //
+    /** For numeric array results */
+    { $case: "floatValues"; value: FloatArray }
+    | //
+    /**
+     * For structured data results (JSON-like)
+     * Must follow a map<string, value> schema where value corresponds to https://protobuf.dev/reference/protobuf/google.protobuf/#value
+     */
+    { $case: "structValue"; value: { [key: string]: any } | undefined }
     | undefined;
   /** Timestamp when the result was produced */
-  timestamp: number;
+  timestamp?: string | undefined;
 }
 
 /**
@@ -238,22 +260,28 @@ export interface Result {
  */
 export interface ProcessorRegistration {
   /** Unique name of the runtime */
-  name: string;
+  name?:
+    | string
+    | undefined;
   /**
    * Language/runtime of the processor
    * Examples: "python3.9", "go1.19", "Rust4.1"
    */
-  runtime: string;
+  runtime?:
+    | string
+    | undefined;
   /**
    * The connection string of the processor
    * e.g. grpc://localhost:5433
    */
-  connectionStr: string;
+  connectionStr?:
+    | string
+    | undefined;
   /**
    * Algorithms this processor can execute
    * The processor must implement all listed algorithms
    */
-  supportedAlgorithms: Algorithm[];
+  supportedAlgorithms?: Algorithm[] | undefined;
 }
 
 /**
@@ -265,19 +293,21 @@ export interface ProcessingTask {
    * Unique ID for this specific task execution
    * Used to correlate results and track execution state
    */
-  taskId: string;
+  taskId?:
+    | string
+    | undefined;
   /**
    * Algorithm to execute
    * Must be one of the algorithms the processor registered support for
    */
-  algorithm:
+  algorithm?:
     | Algorithm
     | undefined;
   /**
    * Window that triggered this task
    * Provides the time context for the algorithm execution
    */
-  window:
+  window?:
     | Window
     | undefined;
   /**
@@ -285,7 +315,7 @@ export interface ProcessingTask {
    * Contains all results that this algorithm declared dependencies on
    * All dependencies will be present when task is sent
    */
-  dependencyResults: Result[];
+  dependencyResults?: Result[] | undefined;
 }
 
 /**
@@ -294,33 +324,39 @@ export interface ProcessingTask {
  */
 export interface ExecutionRequest {
   /** The exec_id */
-  execId: string;
+  execId?:
+    | string
+    | undefined;
   /** The window that triggered the algorithm */
-  window:
+  window?:
     | Window
     | undefined;
   /** Results from dependant algorithms */
-  algorithmResults: AlgorithmResult[];
+  algorithmResults?:
+    | AlgorithmResult[]
+    | undefined;
   /** The algorithms to execute */
-  algorithms: Algorithm[];
+  algorithms?: Algorithm[] | undefined;
 }
 
 export interface ExecutionResult {
   /** Exec ID */
-  execId: string;
+  execId?:
+    | string
+    | undefined;
   /** The algorithn result */
-  algorithmResult: AlgorithmResult | undefined;
+  algorithmResult?: AlgorithmResult | undefined;
 }
 
 /** AlgorithmWindowResult Packaged algorithm and result to a window */
 export interface AlgorithmResult {
-  algorithm: Algorithm | undefined;
-  result: Result | undefined;
+  algorithm?: Algorithm | undefined;
+  result?: Result | undefined;
 }
 
 export interface Status {
-  received: boolean;
-  message: string;
+  received?: boolean | undefined;
+  message?: string | undefined;
 }
 
 /** HealthCheckRequest is sent to processors to verify they are functioning */
@@ -329,17 +365,21 @@ export interface HealthCheckRequest {
    * Timestamp of the request in unix epoch milliseconds
    * Used to measure response latency
    */
-  timestamp: number;
+  timestamp?: string | undefined;
 }
 
 /** HealthCheckResponse indicates the health status of a processor */
 export interface HealthCheckResponse {
   /** Current health status */
-  status: HealthCheckResponse_Status;
+  status?:
+    | HealthCheckResponse_Status
+    | undefined;
   /** Optional message providing more detail about the health status */
-  message: string;
+  message?:
+    | string
+    | undefined;
   /** System metrics about the processor */
-  metrics: ProcessorMetrics | undefined;
+  metrics?: ProcessorMetrics | undefined;
 }
 
 /** Overall health status of the processor */
@@ -395,13 +435,19 @@ export function healthCheckResponse_StatusToJSON(object: HealthCheckResponse_Sta
 /** ProcessorMetrics provides runtime information about a processor */
 export interface ProcessorMetrics {
   /** Number of algorithms currently being executed */
-  activeTasks: number;
+  activeTasks?:
+    | number
+    | undefined;
   /** Memory usage in bytes */
-  memoryBytes: number;
+  memoryBytes?:
+    | string
+    | undefined;
   /** CPU usage percentage (0-100) */
-  cpuPercent: number;
+  cpuPercent?:
+    | number
+    | undefined;
   /** Time since processor started in seconds */
-  uptimeSeconds: number;
+  uptimeSeconds?: string | undefined;
 }
 
 /** ---------------------------- Data Messages ---------------------------- */
@@ -409,28 +455,28 @@ export interface WindowTypeRead {
 }
 
 export interface WindowTypes {
-  windows: WindowType[];
+  windows?: WindowType[] | undefined;
 }
 
 function createBaseWindow(): Window {
-  return { timeFrom: 0, timeTo: 0, windowTypeName: "", windowTypeVersion: "", origin: "" };
+  return { timeFrom: "0", timeTo: "0", windowTypeName: "", windowTypeVersion: "", origin: "" };
 }
 
 export const Window: MessageFns<Window> = {
   encode(message: Window, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.timeFrom !== 0) {
+    if (message.timeFrom !== undefined && message.timeFrom !== "0") {
       writer.uint32(8).uint64(message.timeFrom);
     }
-    if (message.timeTo !== 0) {
+    if (message.timeTo !== undefined && message.timeTo !== "0") {
       writer.uint32(16).uint64(message.timeTo);
     }
-    if (message.windowTypeName !== "") {
+    if (message.windowTypeName !== undefined && message.windowTypeName !== "") {
       writer.uint32(26).string(message.windowTypeName);
     }
-    if (message.windowTypeVersion !== "") {
+    if (message.windowTypeVersion !== undefined && message.windowTypeVersion !== "") {
       writer.uint32(34).string(message.windowTypeVersion);
     }
-    if (message.origin !== "") {
+    if (message.origin !== undefined && message.origin !== "") {
       writer.uint32(42).string(message.origin);
     }
     return writer;
@@ -448,7 +494,7 @@ export const Window: MessageFns<Window> = {
             break;
           }
 
-          message.timeFrom = longToNumber(reader.uint64());
+          message.timeFrom = reader.uint64().toString();
           continue;
         }
         case 2: {
@@ -456,7 +502,7 @@ export const Window: MessageFns<Window> = {
             break;
           }
 
-          message.timeTo = longToNumber(reader.uint64());
+          message.timeTo = reader.uint64().toString();
           continue;
         }
         case 3: {
@@ -494,8 +540,8 @@ export const Window: MessageFns<Window> = {
 
   fromJSON(object: any): Window {
     return {
-      timeFrom: isSet(object.timeFrom) ? globalThis.Number(object.timeFrom) : 0,
-      timeTo: isSet(object.timeTo) ? globalThis.Number(object.timeTo) : 0,
+      timeFrom: isSet(object.timeFrom) ? globalThis.String(object.timeFrom) : "0",
+      timeTo: isSet(object.timeTo) ? globalThis.String(object.timeTo) : "0",
       windowTypeName: isSet(object.windowTypeName) ? globalThis.String(object.windowTypeName) : "",
       windowTypeVersion: isSet(object.windowTypeVersion) ? globalThis.String(object.windowTypeVersion) : "",
       origin: isSet(object.origin) ? globalThis.String(object.origin) : "",
@@ -504,19 +550,19 @@ export const Window: MessageFns<Window> = {
 
   toJSON(message: Window): unknown {
     const obj: any = {};
-    if (message.timeFrom !== 0) {
-      obj.timeFrom = Math.round(message.timeFrom);
+    if (message.timeFrom !== undefined && message.timeFrom !== "0") {
+      obj.timeFrom = message.timeFrom;
     }
-    if (message.timeTo !== 0) {
-      obj.timeTo = Math.round(message.timeTo);
+    if (message.timeTo !== undefined && message.timeTo !== "0") {
+      obj.timeTo = message.timeTo;
     }
-    if (message.windowTypeName !== "") {
+    if (message.windowTypeName !== undefined && message.windowTypeName !== "") {
       obj.windowTypeName = message.windowTypeName;
     }
-    if (message.windowTypeVersion !== "") {
+    if (message.windowTypeVersion !== undefined && message.windowTypeVersion !== "") {
       obj.windowTypeVersion = message.windowTypeVersion;
     }
-    if (message.origin !== "") {
+    if (message.origin !== undefined && message.origin !== "") {
       obj.origin = message.origin;
     }
     return obj;
@@ -527,8 +573,8 @@ export const Window: MessageFns<Window> = {
   },
   fromPartial<I extends Exact<DeepPartial<Window>, I>>(object: I): Window {
     const message = createBaseWindow();
-    message.timeFrom = object.timeFrom ?? 0;
-    message.timeTo = object.timeTo ?? 0;
+    message.timeFrom = object.timeFrom ?? "0";
+    message.timeTo = object.timeTo ?? "0";
     message.windowTypeName = object.windowTypeName ?? "";
     message.windowTypeVersion = object.windowTypeVersion ?? "";
     message.origin = object.origin ?? "";
@@ -542,10 +588,10 @@ function createBaseWindowType(): WindowType {
 
 export const WindowType: MessageFns<WindowType> = {
   encode(message: WindowType, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       writer.uint32(10).string(message.name);
     }
-    if (message.version !== "") {
+    if (message.version !== undefined && message.version !== "") {
       writer.uint32(18).string(message.version);
     }
     return writer;
@@ -592,10 +638,10 @@ export const WindowType: MessageFns<WindowType> = {
 
   toJSON(message: WindowType): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       obj.name = message.name;
     }
-    if (message.version !== "") {
+    if (message.version !== undefined && message.version !== "") {
       obj.version = message.version;
     }
     return obj;
@@ -618,7 +664,7 @@ function createBaseWindowEmitStatus(): WindowEmitStatus {
 
 export const WindowEmitStatus: MessageFns<WindowEmitStatus> = {
   encode(message: WindowEmitStatus, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
+    if (message.status !== undefined && message.status !== 0) {
       writer.uint32(8).int32(message.status);
     }
     return writer;
@@ -654,7 +700,7 @@ export const WindowEmitStatus: MessageFns<WindowEmitStatus> = {
 
   toJSON(message: WindowEmitStatus): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== undefined && message.status !== 0) {
       obj.status = windowEmitStatus_StatusEnumToJSON(message.status);
     }
     return obj;
@@ -676,16 +722,16 @@ function createBaseAlgorithmDependency(): AlgorithmDependency {
 
 export const AlgorithmDependency: MessageFns<AlgorithmDependency> = {
   encode(message: AlgorithmDependency, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       writer.uint32(10).string(message.name);
     }
-    if (message.version !== "") {
+    if (message.version !== undefined && message.version !== "") {
       writer.uint32(18).string(message.version);
     }
-    if (message.processorName !== "") {
+    if (message.processorName !== undefined && message.processorName !== "") {
       writer.uint32(26).string(message.processorName);
     }
-    if (message.processorRuntime !== "") {
+    if (message.processorRuntime !== undefined && message.processorRuntime !== "") {
       writer.uint32(34).string(message.processorRuntime);
     }
     return writer;
@@ -750,16 +796,16 @@ export const AlgorithmDependency: MessageFns<AlgorithmDependency> = {
 
   toJSON(message: AlgorithmDependency): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       obj.name = message.name;
     }
-    if (message.version !== "") {
+    if (message.version !== undefined && message.version !== "") {
       obj.version = message.version;
     }
-    if (message.processorName !== "") {
+    if (message.processorName !== undefined && message.processorName !== "") {
       obj.processorName = message.processorName;
     }
-    if (message.processorRuntime !== "") {
+    if (message.processorRuntime !== undefined && message.processorRuntime !== "") {
       obj.processorRuntime = message.processorRuntime;
     }
     return obj;
@@ -784,17 +830,19 @@ function createBaseAlgorithm(): Algorithm {
 
 export const Algorithm: MessageFns<Algorithm> = {
   encode(message: Algorithm, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       writer.uint32(10).string(message.name);
     }
-    if (message.version !== "") {
+    if (message.version !== undefined && message.version !== "") {
       writer.uint32(18).string(message.version);
     }
     if (message.windowType !== undefined) {
       WindowType.encode(message.windowType, writer.uint32(26).fork()).join();
     }
-    for (const v of message.dependencies) {
-      AlgorithmDependency.encode(v!, writer.uint32(34).fork()).join();
+    if (message.dependencies !== undefined && message.dependencies.length !== 0) {
+      for (const v of message.dependencies) {
+        AlgorithmDependency.encode(v!, writer.uint32(34).fork()).join();
+      }
     }
     return writer;
   },
@@ -835,7 +883,10 @@ export const Algorithm: MessageFns<Algorithm> = {
             break;
           }
 
-          message.dependencies.push(AlgorithmDependency.decode(reader, reader.uint32()));
+          const el = AlgorithmDependency.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.dependencies!.push(el);
+          }
           continue;
         }
       }
@@ -860,10 +911,10 @@ export const Algorithm: MessageFns<Algorithm> = {
 
   toJSON(message: Algorithm): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       obj.name = message.name;
     }
-    if (message.version !== "") {
+    if (message.version !== undefined && message.version !== "") {
       obj.version = message.version;
     }
     if (message.windowType !== undefined) {
@@ -896,11 +947,13 @@ function createBaseFloatArray(): FloatArray {
 
 export const FloatArray: MessageFns<FloatArray> = {
   encode(message: FloatArray, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    writer.uint32(10).fork();
-    for (const v of message.values) {
-      writer.float(v);
+    if (message.values !== undefined && message.values.length !== 0) {
+      writer.uint32(10).fork();
+      for (const v of message.values) {
+        writer.float(v);
+      }
+      writer.join();
     }
-    writer.join();
     return writer;
   },
 
@@ -913,7 +966,7 @@ export const FloatArray: MessageFns<FloatArray> = {
       switch (tag >>> 3) {
         case 1: {
           if (tag === 13) {
-            message.values.push(reader.float());
+            message.values!.push(reader.float());
 
             continue;
           }
@@ -921,7 +974,7 @@ export const FloatArray: MessageFns<FloatArray> = {
           if (tag === 10) {
             const end2 = reader.uint32() + reader.pos;
             while (reader.pos < end2) {
-              message.values.push(reader.float());
+              message.values!.push(reader.float());
             }
 
             continue;
@@ -963,24 +1016,26 @@ export const FloatArray: MessageFns<FloatArray> = {
 };
 
 function createBaseResult(): Result {
-  return { status: 0, singleValue: undefined, floatValues: undefined, structValue: undefined, timestamp: 0 };
+  return { status: 0, resultData: undefined, timestamp: "0" };
 }
 
 export const Result: MessageFns<Result> = {
   encode(message: Result, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
+    if (message.status !== undefined && message.status !== 0) {
       writer.uint32(8).int32(message.status);
     }
-    if (message.singleValue !== undefined) {
-      writer.uint32(21).float(message.singleValue);
+    switch (message.resultData?.$case) {
+      case "singleValue":
+        writer.uint32(21).float(message.resultData.value);
+        break;
+      case "floatValues":
+        FloatArray.encode(message.resultData.value, writer.uint32(26).fork()).join();
+        break;
+      case "structValue":
+        Struct.encode(Struct.wrap(message.resultData.value), writer.uint32(34).fork()).join();
+        break;
     }
-    if (message.floatValues !== undefined) {
-      FloatArray.encode(message.floatValues, writer.uint32(26).fork()).join();
-    }
-    if (message.structValue !== undefined) {
-      Struct.encode(Struct.wrap(message.structValue), writer.uint32(34).fork()).join();
-    }
-    if (message.timestamp !== 0) {
+    if (message.timestamp !== undefined && message.timestamp !== "0") {
       writer.uint32(40).int64(message.timestamp);
     }
     return writer;
@@ -1006,7 +1061,7 @@ export const Result: MessageFns<Result> = {
             break;
           }
 
-          message.singleValue = reader.float();
+          message.resultData = { $case: "singleValue", value: reader.float() };
           continue;
         }
         case 3: {
@@ -1014,7 +1069,7 @@ export const Result: MessageFns<Result> = {
             break;
           }
 
-          message.floatValues = FloatArray.decode(reader, reader.uint32());
+          message.resultData = { $case: "floatValues", value: FloatArray.decode(reader, reader.uint32()) };
           continue;
         }
         case 4: {
@@ -1022,7 +1077,7 @@ export const Result: MessageFns<Result> = {
             break;
           }
 
-          message.structValue = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          message.resultData = { $case: "structValue", value: Struct.unwrap(Struct.decode(reader, reader.uint32())) };
           continue;
         }
         case 5: {
@@ -1030,7 +1085,7 @@ export const Result: MessageFns<Result> = {
             break;
           }
 
-          message.timestamp = longToNumber(reader.int64());
+          message.timestamp = reader.int64().toString();
           continue;
         }
       }
@@ -1045,29 +1100,31 @@ export const Result: MessageFns<Result> = {
   fromJSON(object: any): Result {
     return {
       status: isSet(object.status) ? resultStatusFromJSON(object.status) : 0,
-      singleValue: isSet(object.singleValue) ? globalThis.Number(object.singleValue) : undefined,
-      floatValues: isSet(object.floatValues) ? FloatArray.fromJSON(object.floatValues) : undefined,
-      structValue: isObject(object.structValue) ? object.structValue : undefined,
-      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
+      resultData: isSet(object.singleValue)
+        ? { $case: "singleValue", value: globalThis.Number(object.singleValue) }
+        : isSet(object.floatValues)
+        ? { $case: "floatValues", value: FloatArray.fromJSON(object.floatValues) }
+        : isSet(object.structValue)
+        ? { $case: "structValue", value: object.structValue }
+        : undefined,
+      timestamp: isSet(object.timestamp) ? globalThis.String(object.timestamp) : "0",
     };
   },
 
   toJSON(message: Result): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== undefined && message.status !== 0) {
       obj.status = resultStatusToJSON(message.status);
     }
-    if (message.singleValue !== undefined) {
-      obj.singleValue = message.singleValue;
+    if (message.resultData?.$case === "singleValue") {
+      obj.singleValue = message.resultData.value;
+    } else if (message.resultData?.$case === "floatValues") {
+      obj.floatValues = FloatArray.toJSON(message.resultData.value);
+    } else if (message.resultData?.$case === "structValue") {
+      obj.structValue = message.resultData.value;
     }
-    if (message.floatValues !== undefined) {
-      obj.floatValues = FloatArray.toJSON(message.floatValues);
-    }
-    if (message.structValue !== undefined) {
-      obj.structValue = message.structValue;
-    }
-    if (message.timestamp !== 0) {
-      obj.timestamp = Math.round(message.timestamp);
+    if (message.timestamp !== undefined && message.timestamp !== "0") {
+      obj.timestamp = message.timestamp;
     }
     return obj;
   },
@@ -1078,12 +1135,27 @@ export const Result: MessageFns<Result> = {
   fromPartial<I extends Exact<DeepPartial<Result>, I>>(object: I): Result {
     const message = createBaseResult();
     message.status = object.status ?? 0;
-    message.singleValue = object.singleValue ?? undefined;
-    message.floatValues = (object.floatValues !== undefined && object.floatValues !== null)
-      ? FloatArray.fromPartial(object.floatValues)
-      : undefined;
-    message.structValue = object.structValue ?? undefined;
-    message.timestamp = object.timestamp ?? 0;
+    switch (object.resultData?.$case) {
+      case "singleValue": {
+        if (object.resultData?.value !== undefined && object.resultData?.value !== null) {
+          message.resultData = { $case: "singleValue", value: object.resultData.value };
+        }
+        break;
+      }
+      case "floatValues": {
+        if (object.resultData?.value !== undefined && object.resultData?.value !== null) {
+          message.resultData = { $case: "floatValues", value: FloatArray.fromPartial(object.resultData.value) };
+        }
+        break;
+      }
+      case "structValue": {
+        if (object.resultData?.value !== undefined && object.resultData?.value !== null) {
+          message.resultData = { $case: "structValue", value: object.resultData.value };
+        }
+        break;
+      }
+    }
+    message.timestamp = object.timestamp ?? "0";
     return message;
   },
 };
@@ -1094,17 +1166,19 @@ function createBaseProcessorRegistration(): ProcessorRegistration {
 
 export const ProcessorRegistration: MessageFns<ProcessorRegistration> = {
   encode(message: ProcessorRegistration, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       writer.uint32(10).string(message.name);
     }
-    if (message.runtime !== "") {
+    if (message.runtime !== undefined && message.runtime !== "") {
       writer.uint32(18).string(message.runtime);
     }
-    if (message.connectionStr !== "") {
+    if (message.connectionStr !== undefined && message.connectionStr !== "") {
       writer.uint32(26).string(message.connectionStr);
     }
-    for (const v of message.supportedAlgorithms) {
-      Algorithm.encode(v!, writer.uint32(34).fork()).join();
+    if (message.supportedAlgorithms !== undefined && message.supportedAlgorithms.length !== 0) {
+      for (const v of message.supportedAlgorithms) {
+        Algorithm.encode(v!, writer.uint32(34).fork()).join();
+      }
     }
     return writer;
   },
@@ -1145,7 +1219,10 @@ export const ProcessorRegistration: MessageFns<ProcessorRegistration> = {
             break;
           }
 
-          message.supportedAlgorithms.push(Algorithm.decode(reader, reader.uint32()));
+          const el = Algorithm.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.supportedAlgorithms!.push(el);
+          }
           continue;
         }
       }
@@ -1170,13 +1247,13 @@ export const ProcessorRegistration: MessageFns<ProcessorRegistration> = {
 
   toJSON(message: ProcessorRegistration): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== undefined && message.name !== "") {
       obj.name = message.name;
     }
-    if (message.runtime !== "") {
+    if (message.runtime !== undefined && message.runtime !== "") {
       obj.runtime = message.runtime;
     }
-    if (message.connectionStr !== "") {
+    if (message.connectionStr !== undefined && message.connectionStr !== "") {
       obj.connectionStr = message.connectionStr;
     }
     if (message.supportedAlgorithms?.length) {
@@ -1204,7 +1281,7 @@ function createBaseProcessingTask(): ProcessingTask {
 
 export const ProcessingTask: MessageFns<ProcessingTask> = {
   encode(message: ProcessingTask, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.taskId !== "") {
+    if (message.taskId !== undefined && message.taskId !== "") {
       writer.uint32(10).string(message.taskId);
     }
     if (message.algorithm !== undefined) {
@@ -1213,8 +1290,10 @@ export const ProcessingTask: MessageFns<ProcessingTask> = {
     if (message.window !== undefined) {
       Window.encode(message.window, writer.uint32(26).fork()).join();
     }
-    for (const v of message.dependencyResults) {
-      Result.encode(v!, writer.uint32(34).fork()).join();
+    if (message.dependencyResults !== undefined && message.dependencyResults.length !== 0) {
+      for (const v of message.dependencyResults) {
+        Result.encode(v!, writer.uint32(34).fork()).join();
+      }
     }
     return writer;
   },
@@ -1255,7 +1334,10 @@ export const ProcessingTask: MessageFns<ProcessingTask> = {
             break;
           }
 
-          message.dependencyResults.push(Result.decode(reader, reader.uint32()));
+          const el = Result.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.dependencyResults!.push(el);
+          }
           continue;
         }
       }
@@ -1280,7 +1362,7 @@ export const ProcessingTask: MessageFns<ProcessingTask> = {
 
   toJSON(message: ProcessingTask): unknown {
     const obj: any = {};
-    if (message.taskId !== "") {
+    if (message.taskId !== undefined && message.taskId !== "") {
       obj.taskId = message.taskId;
     }
     if (message.algorithm !== undefined) {
@@ -1318,17 +1400,21 @@ function createBaseExecutionRequest(): ExecutionRequest {
 
 export const ExecutionRequest: MessageFns<ExecutionRequest> = {
   encode(message: ExecutionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.execId !== "") {
+    if (message.execId !== undefined && message.execId !== "") {
       writer.uint32(10).string(message.execId);
     }
     if (message.window !== undefined) {
       Window.encode(message.window, writer.uint32(18).fork()).join();
     }
-    for (const v of message.algorithmResults) {
-      AlgorithmResult.encode(v!, writer.uint32(26).fork()).join();
+    if (message.algorithmResults !== undefined && message.algorithmResults.length !== 0) {
+      for (const v of message.algorithmResults) {
+        AlgorithmResult.encode(v!, writer.uint32(26).fork()).join();
+      }
     }
-    for (const v of message.algorithms) {
-      Algorithm.encode(v!, writer.uint32(34).fork()).join();
+    if (message.algorithms !== undefined && message.algorithms.length !== 0) {
+      for (const v of message.algorithms) {
+        Algorithm.encode(v!, writer.uint32(34).fork()).join();
+      }
     }
     return writer;
   },
@@ -1361,7 +1447,10 @@ export const ExecutionRequest: MessageFns<ExecutionRequest> = {
             break;
           }
 
-          message.algorithmResults.push(AlgorithmResult.decode(reader, reader.uint32()));
+          const el = AlgorithmResult.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.algorithmResults!.push(el);
+          }
           continue;
         }
         case 4: {
@@ -1369,7 +1458,10 @@ export const ExecutionRequest: MessageFns<ExecutionRequest> = {
             break;
           }
 
-          message.algorithms.push(Algorithm.decode(reader, reader.uint32()));
+          const el = Algorithm.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.algorithms!.push(el);
+          }
           continue;
         }
       }
@@ -1396,7 +1488,7 @@ export const ExecutionRequest: MessageFns<ExecutionRequest> = {
 
   toJSON(message: ExecutionRequest): unknown {
     const obj: any = {};
-    if (message.execId !== "") {
+    if (message.execId !== undefined && message.execId !== "") {
       obj.execId = message.execId;
     }
     if (message.window !== undefined) {
@@ -1432,7 +1524,7 @@ function createBaseExecutionResult(): ExecutionResult {
 
 export const ExecutionResult: MessageFns<ExecutionResult> = {
   encode(message: ExecutionResult, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.execId !== "") {
+    if (message.execId !== undefined && message.execId !== "") {
       writer.uint32(10).string(message.execId);
     }
     if (message.algorithmResult !== undefined) {
@@ -1482,7 +1574,7 @@ export const ExecutionResult: MessageFns<ExecutionResult> = {
 
   toJSON(message: ExecutionResult): unknown {
     const obj: any = {};
-    if (message.execId !== "") {
+    if (message.execId !== undefined && message.execId !== "") {
       obj.execId = message.execId;
     }
     if (message.algorithmResult !== undefined) {
@@ -1590,10 +1682,10 @@ function createBaseStatus(): Status {
 
 export const Status: MessageFns<Status> = {
   encode(message: Status, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.received !== false) {
+    if (message.received !== undefined && message.received !== false) {
       writer.uint32(8).bool(message.received);
     }
-    if (message.message !== "") {
+    if (message.message !== undefined && message.message !== "") {
       writer.uint32(18).string(message.message);
     }
     return writer;
@@ -1640,10 +1732,10 @@ export const Status: MessageFns<Status> = {
 
   toJSON(message: Status): unknown {
     const obj: any = {};
-    if (message.received !== false) {
+    if (message.received !== undefined && message.received !== false) {
       obj.received = message.received;
     }
-    if (message.message !== "") {
+    if (message.message !== undefined && message.message !== "") {
       obj.message = message.message;
     }
     return obj;
@@ -1661,12 +1753,12 @@ export const Status: MessageFns<Status> = {
 };
 
 function createBaseHealthCheckRequest(): HealthCheckRequest {
-  return { timestamp: 0 };
+  return { timestamp: "0" };
 }
 
 export const HealthCheckRequest: MessageFns<HealthCheckRequest> = {
   encode(message: HealthCheckRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.timestamp !== 0) {
+    if (message.timestamp !== undefined && message.timestamp !== "0") {
       writer.uint32(8).int64(message.timestamp);
     }
     return writer;
@@ -1684,7 +1776,7 @@ export const HealthCheckRequest: MessageFns<HealthCheckRequest> = {
             break;
           }
 
-          message.timestamp = longToNumber(reader.int64());
+          message.timestamp = reader.int64().toString();
           continue;
         }
       }
@@ -1697,13 +1789,13 @@ export const HealthCheckRequest: MessageFns<HealthCheckRequest> = {
   },
 
   fromJSON(object: any): HealthCheckRequest {
-    return { timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0 };
+    return { timestamp: isSet(object.timestamp) ? globalThis.String(object.timestamp) : "0" };
   },
 
   toJSON(message: HealthCheckRequest): unknown {
     const obj: any = {};
-    if (message.timestamp !== 0) {
-      obj.timestamp = Math.round(message.timestamp);
+    if (message.timestamp !== undefined && message.timestamp !== "0") {
+      obj.timestamp = message.timestamp;
     }
     return obj;
   },
@@ -1713,7 +1805,7 @@ export const HealthCheckRequest: MessageFns<HealthCheckRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<HealthCheckRequest>, I>>(object: I): HealthCheckRequest {
     const message = createBaseHealthCheckRequest();
-    message.timestamp = object.timestamp ?? 0;
+    message.timestamp = object.timestamp ?? "0";
     return message;
   },
 };
@@ -1724,10 +1816,10 @@ function createBaseHealthCheckResponse(): HealthCheckResponse {
 
 export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
   encode(message: HealthCheckResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
+    if (message.status !== undefined && message.status !== 0) {
       writer.uint32(8).int32(message.status);
     }
-    if (message.message !== "") {
+    if (message.message !== undefined && message.message !== "") {
       writer.uint32(18).string(message.message);
     }
     if (message.metrics !== undefined) {
@@ -1786,10 +1878,10 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
 
   toJSON(message: HealthCheckResponse): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== undefined && message.status !== 0) {
       obj.status = healthCheckResponse_StatusToJSON(message.status);
     }
-    if (message.message !== "") {
+    if (message.message !== undefined && message.message !== "") {
       obj.message = message.message;
     }
     if (message.metrics !== undefined) {
@@ -1813,21 +1905,21 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
 };
 
 function createBaseProcessorMetrics(): ProcessorMetrics {
-  return { activeTasks: 0, memoryBytes: 0, cpuPercent: 0, uptimeSeconds: 0 };
+  return { activeTasks: 0, memoryBytes: "0", cpuPercent: 0, uptimeSeconds: "0" };
 }
 
 export const ProcessorMetrics: MessageFns<ProcessorMetrics> = {
   encode(message: ProcessorMetrics, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.activeTasks !== 0) {
+    if (message.activeTasks !== undefined && message.activeTasks !== 0) {
       writer.uint32(8).int32(message.activeTasks);
     }
-    if (message.memoryBytes !== 0) {
+    if (message.memoryBytes !== undefined && message.memoryBytes !== "0") {
       writer.uint32(16).int64(message.memoryBytes);
     }
-    if (message.cpuPercent !== 0) {
+    if (message.cpuPercent !== undefined && message.cpuPercent !== 0) {
       writer.uint32(29).float(message.cpuPercent);
     }
-    if (message.uptimeSeconds !== 0) {
+    if (message.uptimeSeconds !== undefined && message.uptimeSeconds !== "0") {
       writer.uint32(32).int64(message.uptimeSeconds);
     }
     return writer;
@@ -1853,7 +1945,7 @@ export const ProcessorMetrics: MessageFns<ProcessorMetrics> = {
             break;
           }
 
-          message.memoryBytes = longToNumber(reader.int64());
+          message.memoryBytes = reader.int64().toString();
           continue;
         }
         case 3: {
@@ -1869,7 +1961,7 @@ export const ProcessorMetrics: MessageFns<ProcessorMetrics> = {
             break;
           }
 
-          message.uptimeSeconds = longToNumber(reader.int64());
+          message.uptimeSeconds = reader.int64().toString();
           continue;
         }
       }
@@ -1884,25 +1976,25 @@ export const ProcessorMetrics: MessageFns<ProcessorMetrics> = {
   fromJSON(object: any): ProcessorMetrics {
     return {
       activeTasks: isSet(object.activeTasks) ? globalThis.Number(object.activeTasks) : 0,
-      memoryBytes: isSet(object.memoryBytes) ? globalThis.Number(object.memoryBytes) : 0,
+      memoryBytes: isSet(object.memoryBytes) ? globalThis.String(object.memoryBytes) : "0",
       cpuPercent: isSet(object.cpuPercent) ? globalThis.Number(object.cpuPercent) : 0,
-      uptimeSeconds: isSet(object.uptimeSeconds) ? globalThis.Number(object.uptimeSeconds) : 0,
+      uptimeSeconds: isSet(object.uptimeSeconds) ? globalThis.String(object.uptimeSeconds) : "0",
     };
   },
 
   toJSON(message: ProcessorMetrics): unknown {
     const obj: any = {};
-    if (message.activeTasks !== 0) {
+    if (message.activeTasks !== undefined && message.activeTasks !== 0) {
       obj.activeTasks = Math.round(message.activeTasks);
     }
-    if (message.memoryBytes !== 0) {
-      obj.memoryBytes = Math.round(message.memoryBytes);
+    if (message.memoryBytes !== undefined && message.memoryBytes !== "0") {
+      obj.memoryBytes = message.memoryBytes;
     }
-    if (message.cpuPercent !== 0) {
+    if (message.cpuPercent !== undefined && message.cpuPercent !== 0) {
       obj.cpuPercent = message.cpuPercent;
     }
-    if (message.uptimeSeconds !== 0) {
-      obj.uptimeSeconds = Math.round(message.uptimeSeconds);
+    if (message.uptimeSeconds !== undefined && message.uptimeSeconds !== "0") {
+      obj.uptimeSeconds = message.uptimeSeconds;
     }
     return obj;
   },
@@ -1913,9 +2005,9 @@ export const ProcessorMetrics: MessageFns<ProcessorMetrics> = {
   fromPartial<I extends Exact<DeepPartial<ProcessorMetrics>, I>>(object: I): ProcessorMetrics {
     const message = createBaseProcessorMetrics();
     message.activeTasks = object.activeTasks ?? 0;
-    message.memoryBytes = object.memoryBytes ?? 0;
+    message.memoryBytes = object.memoryBytes ?? "0";
     message.cpuPercent = object.cpuPercent ?? 0;
-    message.uptimeSeconds = object.uptimeSeconds ?? 0;
+    message.uptimeSeconds = object.uptimeSeconds ?? "0";
     return message;
   },
 };
@@ -1969,8 +2061,10 @@ function createBaseWindowTypes(): WindowTypes {
 
 export const WindowTypes: MessageFns<WindowTypes> = {
   encode(message: WindowTypes, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    for (const v of message.windows) {
-      WindowType.encode(v!, writer.uint32(10).fork()).join();
+    if (message.windows !== undefined && message.windows.length !== 0) {
+      for (const v of message.windows) {
+        WindowType.encode(v!, writer.uint32(10).fork()).join();
+      }
     }
     return writer;
   },
@@ -1987,7 +2081,10 @@ export const WindowTypes: MessageFns<WindowTypes> = {
             break;
           }
 
-          message.windows.push(WindowType.decode(reader, reader.uint32()));
+          const el = WindowType.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.windows!.push(el);
+          }
           continue;
         }
       }
@@ -2124,27 +2221,13 @@ type Builtin = Date | Function | Uint8Array | string | number | boolean | undefi
 export type DeepPartial<T> = T extends Builtin ? T
   : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends { $case: string; value: unknown } ? { $case: T["$case"]; value?: DeepPartial<T["value"]> }
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function longToNumber(int64: { toString(): string }): number {
-  const num = globalThis.Number(int64.toString());
-  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return num;
-}
-
-function isObject(value: any): boolean {
-  return typeof value === "object" && value !== null;
-}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;
