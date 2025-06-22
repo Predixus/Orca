@@ -261,7 +261,7 @@ func (d *Datalayer) ReadProcessors(
 
 	processors, err := qtx.ReadProcessors(ctx)
 	if err != nil {
-		return &pb.Processors{}, fmt.Errorf("could not read processors: %v", processors)
+		return &pb.Processors{}, fmt.Errorf("could not read processors: %v", err)
 	}
 
 	processorsPb := pb.Processors{
@@ -292,20 +292,14 @@ func (d *Datalayer) ReadResultsStats(
 	pgTx := tx.(*PgTx)
 	qtx := d.queries.WithTx(pgTx.tx)
 
-	windowTypes, err := qtx.ReadWindowTypes(ctx)
+	resultsStats, err := qtx.ReadResultsStats(ctx)
 	if err != nil {
-		return &pb.WindowTypes{}, fmt.Errorf("could not read window types: %v", windowTypes)
+		return &pb.ResultsStats{}, fmt.Errorf("could not read results: %v", err)
 	}
 
-	windowTypesPb := pb.WindowTypes{
-		Windows: make([]*pb.WindowType, len(windowTypes)),
+	resultsStatsPb := pb.ResultsStats{
+		Count: resultsStats,
 	}
 
-	for ii, window := range windowTypes {
-		windowTypesPb.Windows[ii] = &pb.WindowType{
-			Name:    window.Name,
-			Version: window.Version,
-		}
-	}
-	return &windowTypesPb, tx.Commit(ctx)
+	return &resultsStatsPb, tx.Commit(ctx)
 }

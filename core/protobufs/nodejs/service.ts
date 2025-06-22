@@ -2498,13 +2498,13 @@ export const ResultsStatsRead: MessageFns<ResultsStatsRead> = {
 };
 
 function createBaseResultsStats(): ResultsStats {
-  return { Count: "" };
+  return { Count: "0" };
 }
 
 export const ResultsStats: MessageFns<ResultsStats> = {
   encode(message: ResultsStats, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.Count !== undefined && message.Count !== "") {
-      writer.uint32(10).string(message.Count);
+    if (message.Count !== undefined && message.Count !== "0") {
+      writer.uint32(8).int64(message.Count);
     }
     return writer;
   },
@@ -2517,11 +2517,11 @@ export const ResultsStats: MessageFns<ResultsStats> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.Count = reader.string();
+          message.Count = reader.int64().toString();
           continue;
         }
       }
@@ -2534,12 +2534,12 @@ export const ResultsStats: MessageFns<ResultsStats> = {
   },
 
   fromJSON(object: any): ResultsStats {
-    return { Count: isSet(object.Count) ? globalThis.String(object.Count) : "" };
+    return { Count: isSet(object.Count) ? globalThis.String(object.Count) : "0" };
   },
 
   toJSON(message: ResultsStats): unknown {
     const obj: any = {};
-    if (message.Count !== undefined && message.Count !== "") {
+    if (message.Count !== undefined && message.Count !== "0") {
       obj.Count = message.Count;
     }
     return obj;
@@ -2550,7 +2550,7 @@ export const ResultsStats: MessageFns<ResultsStats> = {
   },
   fromPartial<I extends Exact<DeepPartial<ResultsStats>, I>>(object: I): ResultsStats {
     const message = createBaseResultsStats();
-    message.Count = object.Count ?? "";
+    message.Count = object.Count ?? "0";
     return message;
   },
 };

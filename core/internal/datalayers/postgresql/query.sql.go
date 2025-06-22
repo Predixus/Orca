@@ -561,30 +561,17 @@ func (q *Queries) ReadProcessorsByIDs(ctx context.Context, processorIds []int64)
 	return items, nil
 }
 
-const readResultsStats = `-- name: ReadResultsStats :many
+const readResultsStats = `-- name: ReadResultsStats :one
 SELECT
   COUNT(t.id)
 FROM results t
 `
 
-func (q *Queries) ReadResultsStats(ctx context.Context) ([]int64, error) {
-	rows, err := q.db.Query(ctx, readResultsStats)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []int64
-	for rows.Next() {
-		var count int64
-		if err := rows.Scan(&count); err != nil {
-			return nil, err
-		}
-		items = append(items, count)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) ReadResultsStats(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, readResultsStats)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const readWindowTypes = `-- name: ReadWindowTypes :many

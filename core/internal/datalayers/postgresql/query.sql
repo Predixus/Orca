@@ -211,7 +211,7 @@ SELECT
 FROM processor
 ORDER BY created DESC;
 
--- name: ReadResultsStats :many
+-- name: ReadResultsStats :one
 SELECT
   COUNT(t.id)
 FROM results t;

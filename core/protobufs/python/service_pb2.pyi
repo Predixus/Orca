@@ -239,5 +239,5 @@ class ResultsStatsRead(_message.Message):
 class ResultsStats(_message.Message):
     __slots__ = ("Count",)
     COUNT_FIELD_NUMBER: _ClassVar[int]
-    Count: str
-    def __init__(self, Count: _Optional[str] = ...) -> None: ...
+    Count: int
+    def __init__(self, Count: _Optional[int] = ...) -> None: ...
