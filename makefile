@@ -40,7 +40,7 @@ export CGO_ENABLED = 0
 		--ts_proto_out=./nodejs \
 		--ts_proto_opt=esModuleInterop=true \
 		--ts_proto_opt=useExactTypes=true \
-		--ts_proto_opt=outputServices=default \
+		--ts_proto_opt=outputServices=grpc-js \
 		--ts_proto_opt=forceLong=string \
 		--ts_proto_opt=env=node \
 		--ts_proto_opt=useOptionals=all \

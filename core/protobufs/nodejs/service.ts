@@ -6,8 +6,20 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import {
+  type CallOptions,
+  type ChannelCredentials,
+  Client,
+  type ClientOptions,
+  type ClientReadableStream,
+  type ClientUnaryCall,
+  type handleServerStreamingCall,
+  type handleUnaryCall,
+  makeGenericClientConstructor,
+  type Metadata,
+  type ServiceError,
+  type UntypedServiceImplementation,
+} from "@grpc/grpc-js";
 import { Struct } from "./google/protobuf/struct";
 
 export const protobufPackage = "";
@@ -2127,44 +2139,106 @@ export const WindowTypes: MessageFns<WindowTypes> = {
  * - Tracks DAG dependencies and execution state
  * - Routes results between dependent algorithms
  */
-export interface OrcaCore {
+export type OrcaCoreService = typeof OrcaCoreService;
+export const OrcaCoreService = {
   /** Register a processor node and its supported algorithms */
-  RegisterProcessor(request: ProcessorRegistration): Promise<Status>;
+  registerProcessor: {
+    path: "/OrcaCore/RegisterProcessor",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ProcessorRegistration): Buffer =>
+      Buffer.from(ProcessorRegistration.encode(value).finish()),
+    requestDeserialize: (value: Buffer): ProcessorRegistration => ProcessorRegistration.decode(value),
+    responseSerialize: (value: Status): Buffer => Buffer.from(Status.encode(value).finish()),
+    responseDeserialize: (value: Buffer): Status => Status.decode(value),
+  },
   /** Submit a window for processing */
-  EmitWindow(request: Window): Promise<WindowEmitStatus>;
+  emitWindow: {
+    path: "/OrcaCore/EmitWindow",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: Window): Buffer => Buffer.from(Window.encode(value).finish()),
+    requestDeserialize: (value: Buffer): Window => Window.decode(value),
+    responseSerialize: (value: WindowEmitStatus): Buffer => Buffer.from(WindowEmitStatus.encode(value).finish()),
+    responseDeserialize: (value: Buffer): WindowEmitStatus => WindowEmitStatus.decode(value),
+  },
   /** Data operations */
-  ReadWindowTypes(request: WindowTypeRead): Promise<WindowTypes>;
+  readWindowTypes: {
+    path: "/OrcaCore/ReadWindowTypes",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: WindowTypeRead): Buffer => Buffer.from(WindowTypeRead.encode(value).finish()),
+    requestDeserialize: (value: Buffer): WindowTypeRead => WindowTypeRead.decode(value),
+    responseSerialize: (value: WindowTypes): Buffer => Buffer.from(WindowTypes.encode(value).finish()),
+    responseDeserialize: (value: Buffer): WindowTypes => WindowTypes.decode(value),
+  },
+} as const;
+
+export interface OrcaCoreServer extends UntypedServiceImplementation {
+  /** Register a processor node and its supported algorithms */
+  registerProcessor: handleUnaryCall<ProcessorRegistration, Status>;
+  /** Submit a window for processing */
+  emitWindow: handleUnaryCall<Window, WindowEmitStatus>;
+  /** Data operations */
+  readWindowTypes: handleUnaryCall<WindowTypeRead, WindowTypes>;
 }
 
-export const OrcaCoreServiceName = "OrcaCore";
-export class OrcaCoreClientImpl implements OrcaCore {
-  private readonly rpc: Rpc;
-  private readonly service: string;
-  constructor(rpc: Rpc, opts?: { service?: string }) {
-    this.service = opts?.service || OrcaCoreServiceName;
-    this.rpc = rpc;
-    this.RegisterProcessor = this.RegisterProcessor.bind(this);
-    this.EmitWindow = this.EmitWindow.bind(this);
-    this.ReadWindowTypes = this.ReadWindowTypes.bind(this);
-  }
-  RegisterProcessor(request: ProcessorRegistration): Promise<Status> {
-    const data = ProcessorRegistration.encode(request).finish();
-    const promise = this.rpc.request(this.service, "RegisterProcessor", data);
-    return promise.then((data) => Status.decode(new BinaryReader(data)));
-  }
-
-  EmitWindow(request: Window): Promise<WindowEmitStatus> {
-    const data = Window.encode(request).finish();
-    const promise = this.rpc.request(this.service, "EmitWindow", data);
-    return promise.then((data) => WindowEmitStatus.decode(new BinaryReader(data)));
-  }
-
-  ReadWindowTypes(request: WindowTypeRead): Promise<WindowTypes> {
-    const data = WindowTypeRead.encode(request).finish();
-    const promise = this.rpc.request(this.service, "ReadWindowTypes", data);
-    return promise.then((data) => WindowTypes.decode(new BinaryReader(data)));
-  }
+export interface OrcaCoreClient extends Client {
+  /** Register a processor node and its supported algorithms */
+  registerProcessor(
+    request: ProcessorRegistration,
+    callback: (error: ServiceError | null, response: Status) => void,
+  ): ClientUnaryCall;
+  registerProcessor(
+    request: ProcessorRegistration,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: Status) => void,
+  ): ClientUnaryCall;
+  registerProcessor(
+    request: ProcessorRegistration,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: Status) => void,
+  ): ClientUnaryCall;
+  /** Submit a window for processing */
+  emitWindow(
+    request: Window,
+    callback: (error: ServiceError | null, response: WindowEmitStatus) => void,
+  ): ClientUnaryCall;
+  emitWindow(
+    request: Window,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: WindowEmitStatus) => void,
+  ): ClientUnaryCall;
+  emitWindow(
+    request: Window,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: WindowEmitStatus) => void,
+  ): ClientUnaryCall;
+  /** Data operations */
+  readWindowTypes(
+    request: WindowTypeRead,
+    callback: (error: ServiceError | null, response: WindowTypes) => void,
+  ): ClientUnaryCall;
+  readWindowTypes(
+    request: WindowTypeRead,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: WindowTypes) => void,
+  ): ClientUnaryCall;
+  readWindowTypes(
+    request: WindowTypeRead,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: WindowTypes) => void,
+  ): ClientUnaryCall;
 }
+
+export const OrcaCoreClient = makeGenericClientConstructor(OrcaCoreService, "OrcaCore") as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): OrcaCoreClient;
+  service: typeof OrcaCoreService;
+  serviceName: string;
+};
 
 /**
  * ---------------------------- Core Operations ----------------------------
@@ -2176,45 +2250,77 @@ export class OrcaCoreClientImpl implements OrcaCore {
  * - Report results back to the orchestrator
  * Orca will schedule processors asynchronously as per the DAG
  */
-export interface OrcaProcessor {
+export type OrcaProcessorService = typeof OrcaProcessorService;
+export const OrcaProcessorService = {
   /**
    * Execute part of a DAG with streaming results
    * Server streams back execution results as they become available
    */
-  ExecuteDagPart(request: ExecutionRequest): Observable<ExecutionResult>;
+  executeDagPart: {
+    path: "/OrcaProcessor/ExecuteDagPart",
+    requestStream: false,
+    responseStream: true,
+    requestSerialize: (value: ExecutionRequest): Buffer => Buffer.from(ExecutionRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): ExecutionRequest => ExecutionRequest.decode(value),
+    responseSerialize: (value: ExecutionResult): Buffer => Buffer.from(ExecutionResult.encode(value).finish()),
+    responseDeserialize: (value: Buffer): ExecutionResult => ExecutionResult.decode(value),
+  },
   /** Check health/status of processor. i.e. a heartbeat */
-  HealthCheck(request: HealthCheckRequest): Promise<HealthCheckResponse>;
+  healthCheck: {
+    path: "/OrcaProcessor/HealthCheck",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: HealthCheckRequest): Buffer => Buffer.from(HealthCheckRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): HealthCheckRequest => HealthCheckRequest.decode(value),
+    responseSerialize: (value: HealthCheckResponse): Buffer => Buffer.from(HealthCheckResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): HealthCheckResponse => HealthCheckResponse.decode(value),
+  },
+} as const;
+
+export interface OrcaProcessorServer extends UntypedServiceImplementation {
+  /**
+   * Execute part of a DAG with streaming results
+   * Server streams back execution results as they become available
+   */
+  executeDagPart: handleServerStreamingCall<ExecutionRequest, ExecutionResult>;
+  /** Check health/status of processor. i.e. a heartbeat */
+  healthCheck: handleUnaryCall<HealthCheckRequest, HealthCheckResponse>;
 }
 
-export const OrcaProcessorServiceName = "OrcaProcessor";
-export class OrcaProcessorClientImpl implements OrcaProcessor {
-  private readonly rpc: Rpc;
-  private readonly service: string;
-  constructor(rpc: Rpc, opts?: { service?: string }) {
-    this.service = opts?.service || OrcaProcessorServiceName;
-    this.rpc = rpc;
-    this.ExecuteDagPart = this.ExecuteDagPart.bind(this);
-    this.HealthCheck = this.HealthCheck.bind(this);
-  }
-  ExecuteDagPart(request: ExecutionRequest): Observable<ExecutionResult> {
-    const data = ExecutionRequest.encode(request).finish();
-    const result = this.rpc.serverStreamingRequest(this.service, "ExecuteDagPart", data);
-    return result.pipe(map((data) => ExecutionResult.decode(new BinaryReader(data))));
-  }
-
-  HealthCheck(request: HealthCheckRequest): Promise<HealthCheckResponse> {
-    const data = HealthCheckRequest.encode(request).finish();
-    const promise = this.rpc.request(this.service, "HealthCheck", data);
-    return promise.then((data) => HealthCheckResponse.decode(new BinaryReader(data)));
-  }
+export interface OrcaProcessorClient extends Client {
+  /**
+   * Execute part of a DAG with streaming results
+   * Server streams back execution results as they become available
+   */
+  executeDagPart(request: ExecutionRequest, options?: Partial<CallOptions>): ClientReadableStream<ExecutionResult>;
+  executeDagPart(
+    request: ExecutionRequest,
+    metadata?: Metadata,
+    options?: Partial<CallOptions>,
+  ): ClientReadableStream<ExecutionResult>;
+  /** Check health/status of processor. i.e. a heartbeat */
+  healthCheck(
+    request: HealthCheckRequest,
+    callback: (error: ServiceError | null, response: HealthCheckResponse) => void,
+  ): ClientUnaryCall;
+  healthCheck(
+    request: HealthCheckRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: HealthCheckResponse) => void,
+  ): ClientUnaryCall;
+  healthCheck(
+    request: HealthCheckRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: HealthCheckResponse) => void,
+  ): ClientUnaryCall;
 }
 
-interface Rpc {
-  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
-  clientStreamingRequest(service: string, method: string, data: Observable<Uint8Array>): Promise<Uint8Array>;
-  serverStreamingRequest(service: string, method: string, data: Uint8Array): Observable<Uint8Array>;
-  bidirectionalStreamingRequest(service: string, method: string, data: Observable<Uint8Array>): Observable<Uint8Array>;
-}
+export const OrcaProcessorClient = makeGenericClientConstructor(OrcaProcessorService, "OrcaProcessor") as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): OrcaProcessorClient;
+  service: typeof OrcaProcessorService;
+  serviceName: string;
+};
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
