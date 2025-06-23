@@ -296,7 +296,7 @@ type WindowType struct {
 	// Version of the algorithm. Follows basic semver and allows window
 	// types to be changed over time, with traceability
 	Version string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	// Description of the window.
+	// Description of the window
 	// E.g. "Emitted every day, at noon"
 	Description   string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields

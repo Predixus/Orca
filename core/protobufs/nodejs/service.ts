@@ -136,7 +136,7 @@ export interface WindowType {
     | string
     | undefined;
   /**
-   * Description of the window.
+   * Description of the window
    * E.g. "Emitted every day, at noon"
    */
   description?: string | undefined;
