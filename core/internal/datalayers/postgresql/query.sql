@@ -189,7 +189,8 @@ ORDER BY name, runtime;
 SELECT
   id, 
   version, 
-  name, 
+  name,
+  description,
   created
 FROM window_type
 ORDER BY created DESC;

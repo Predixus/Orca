@@ -590,17 +590,19 @@ const readWindowTypes = `-- name: ReadWindowTypes :many
 SELECT
   id, 
   version, 
-  name, 
+  name,
+  description,
   created
 FROM window_type
 ORDER BY created DESC
 `
 
 type ReadWindowTypesRow struct {
-	ID      int64
-	Version string
-	Name    string
-	Created pgtype.Timestamp
+	ID          int64
+	Version     string
+	Name        string
+	Description string
+	Created     pgtype.Timestamp
 }
 
 // -------------------- Data operations ----------------------
@@ -617,6 +619,7 @@ func (q *Queries) ReadWindowTypes(ctx context.Context) ([]ReadWindowTypesRow, er
 			&i.ID,
 			&i.Version,
 			&i.Name,
+			&i.Description,
 			&i.Created,
 		); err != nil {
 			return nil, err

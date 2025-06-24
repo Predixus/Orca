@@ -206,8 +206,9 @@ func (d *Datalayer) ReadWindowTypes(
 
 	for ii, window := range windowTypes {
 		windowTypesPb.Windows[ii] = &pb.WindowType{
-			Name:    window.Name,
-			Version: window.Version,
+			Name:        window.Name,
+			Version:     window.Version,
+			Description: window.Description,
 		}
 	}
 	return &windowTypesPb, tx.Commit(ctx)
