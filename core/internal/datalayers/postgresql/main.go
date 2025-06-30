@@ -111,7 +111,7 @@ func (d *Datalayer) EmitWindow(
 		WindowTypeName:    window.GetWindowTypeName(),
 		WindowTypeVersion: window.GetWindowTypeVersion(),
 		TimeFrom: pgtype.Timestamp{
-			Time:  window.GetTimeTo().AsTime().UTC(),
+			Time:  window.GetTimeFrom().AsTime().UTC(),
 			Valid: true,
 		},
 		TimeTo: pgtype.Timestamp{
