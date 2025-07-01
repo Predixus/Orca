@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/predixus/orca/core/internal/dag"
 	pb "github.com/predixus/orca/core/protobufs/go"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -513,4 +515,70 @@ func (d *Datalayer) ReadWindows(
 		}
 	}
 	return &windowsPb, tx.Commit(ctx)
+}
+
+func (d *Datalayer) ReadDistinctMetadataForWindowType(
+	ctx context.Context,
+	windowMetadataRead *pb.DistinctMetadataForWindowTypeRead,
+) (*pb.DistinctMetadataForWindowType, error) {
+	tx, err := d.WithTx(ctx)
+	if err != nil {
+		slog.Error("could not start a transaction", "error", err)
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	pgTx := tx.(*PgTx)
+	qtx := d.queries.WithTx(pgTx.tx)
+
+	windowMetadata, err := qtx.ReadDistinctWindowMetadata(ctx, ReadDistinctWindowMetadataParams{
+		TimeFrom: pgtype.Timestamp{
+			Time:  windowMetadataRead.GetTimeFrom().AsTime(),
+			Valid: true,
+		},
+		TimeTo: pgtype.Timestamp{
+			Time: windowMetadataRead.GetTimeTo().AsTime(),
+		},
+		WindowTypeName:    windowMetadataRead.GetWindowType().GetName(),
+		WindowTypeVersion: windowMetadataRead.GetWindowType().GetVersion(),
+	})
+	if err != nil {
+		return &pb.DistinctMetadataForWindowType{}, fmt.Errorf(
+			"could not read window metadata: %v",
+			err,
+		)
+	}
+
+	metadataJson := make(map[string]any)
+	for _, metadata := range windowMetadata {
+		tmpMetadataJson := make(map[string]any)
+		err := json.Unmarshal(metadata, &tmpMetadataJson)
+		if err != nil {
+			return &pb.DistinctMetadataForWindowType{}, fmt.Errorf(
+				"could not unmarshal metadata to json: %v",
+				err,
+			)
+		}
+		for key, value := range tmpMetadataJson {
+			valueStr := fmt.Sprintf("%v", value)
+			if existingValues, exists := metadataJson[key]; exists {
+				existingSlice := existingValues.([]string)
+				metadataJson[key] = append(existingSlice, valueStr)
+			} else {
+				metadataJson[key] = []string{valueStr}
+			}
+		}
+	}
+
+	metadataStructPb, err := structpb.NewStruct(metadataJson)
+	if err != nil {
+		return &pb.DistinctMetadataForWindowType{}, fmt.Errorf(
+			"could not convert extracted metadata json (%v) to struct map:%v",
+			metadataJson,
+			err,
+		)
+	}
+	return &pb.DistinctMetadataForWindowType{
+		Fields: metadataStructPb,
+	}, tx.Commit(ctx)
 }
