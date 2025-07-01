@@ -502,5 +502,5 @@ message DistinctMetadataForWindowTypeRead {
 }
 
 message DistinctMetadataForWindowType {
-  google.protobuf.Struct fields = 1;
+  google.protobuf.ListValue metadata = 1;
 }

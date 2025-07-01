@@ -20,7 +20,7 @@ import {
   type ServiceError,
   type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
-import { Struct } from "./google/protobuf/struct";
+import { ListValue, Struct } from "./google/protobuf/struct";
 import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "";
@@ -647,7 +647,7 @@ export interface DistinctMetadataForWindowTypeRead {
 }
 
 export interface DistinctMetadataForWindowType {
-  fields?: { [key: string]: any } | undefined;
+  metadata?: Array<any> | undefined;
 }
 
 function createBaseWindow(): Window {
@@ -3471,13 +3471,13 @@ export const DistinctMetadataForWindowTypeRead: MessageFns<DistinctMetadataForWi
 };
 
 function createBaseDistinctMetadataForWindowType(): DistinctMetadataForWindowType {
-  return { fields: undefined };
+  return { metadata: undefined };
 }
 
 export const DistinctMetadataForWindowType: MessageFns<DistinctMetadataForWindowType> = {
   encode(message: DistinctMetadataForWindowType, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.fields !== undefined) {
-      Struct.encode(Struct.wrap(message.fields), writer.uint32(10).fork()).join();
+    if (message.metadata !== undefined) {
+      ListValue.encode(ListValue.wrap(message.metadata), writer.uint32(10).fork()).join();
     }
     return writer;
   },
@@ -3494,7 +3494,7 @@ export const DistinctMetadataForWindowType: MessageFns<DistinctMetadataForWindow
             break;
           }
 
-          message.fields = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          message.metadata = ListValue.unwrap(ListValue.decode(reader, reader.uint32()));
           continue;
         }
       }
@@ -3507,13 +3507,13 @@ export const DistinctMetadataForWindowType: MessageFns<DistinctMetadataForWindow
   },
 
   fromJSON(object: any): DistinctMetadataForWindowType {
-    return { fields: isObject(object.fields) ? object.fields : undefined };
+    return { metadata: globalThis.Array.isArray(object.metadata) ? [...object.metadata] : undefined };
   },
 
   toJSON(message: DistinctMetadataForWindowType): unknown {
     const obj: any = {};
-    if (message.fields !== undefined) {
-      obj.fields = message.fields;
+    if (message.metadata !== undefined) {
+      obj.metadata = message.metadata;
     }
     return obj;
   },
@@ -3525,7 +3525,7 @@ export const DistinctMetadataForWindowType: MessageFns<DistinctMetadataForWindow
     object: I,
   ): DistinctMetadataForWindowType {
     const message = createBaseDistinctMetadataForWindowType();
-    message.fields = object.fields ?? undefined;
+    message.metadata = object.metadata ?? undefined;
     return message;
   },
 };

@@ -72,8 +72,7 @@ func (d *Datalayer) RegisterProcessor(
 					"algorithm",
 					algo,
 					"depends_on",
-					algoDependentOn,
-					"error",
+					algoDependentOn, "error",
 					err,
 				)
 				return err
@@ -537,48 +536,33 @@ func (d *Datalayer) ReadDistinctMetadataForWindowType(
 			Valid: true,
 		},
 		TimeTo: pgtype.Timestamp{
-			Time: windowMetadataRead.GetTimeTo().AsTime(),
+			Time:  windowMetadataRead.GetTimeTo().AsTime(),
+			Valid: true,
 		},
 		WindowTypeName:    windowMetadataRead.GetWindowType().GetName(),
 		WindowTypeVersion: windowMetadataRead.GetWindowType().GetVersion(),
 	})
 	if err != nil {
-		return &pb.DistinctMetadataForWindowType{}, fmt.Errorf(
-			"could not read window metadata: %v",
-			err,
-		)
+		return nil, fmt.Errorf("could not read window metadata: %w", err)
 	}
 
-	metadataJson := make(map[string]any)
-	for _, metadata := range windowMetadata {
-		tmpMetadataJson := make(map[string]any)
-		err := json.Unmarshal(metadata, &tmpMetadataJson)
-		if err != nil {
-			return &pb.DistinctMetadataForWindowType{}, fmt.Errorf(
-				"could not unmarshal metadata to json: %v",
-				err,
-			)
+	// Convert raw JSON blobs into []any of map[string]any
+	metadataList := make([]any, len(windowMetadata))
+	for i, raw := range windowMetadata {
+		var m map[string]any
+		if err := json.Unmarshal(raw, &m); err != nil {
+			return nil, fmt.Errorf("could not unmarshal metadata at index %d: %w", i, err)
 		}
-		for key, value := range tmpMetadataJson {
-			valueStr := fmt.Sprintf("%v", value)
-			if existingValues, exists := metadataJson[key]; exists {
-				existingSlice := existingValues.([]string)
-				metadataJson[key] = append(existingSlice, valueStr)
-			} else {
-				metadataJson[key] = []string{valueStr}
-			}
-		}
+		metadataList[i] = m
 	}
 
-	metadataStructPb, err := structpb.NewStruct(metadataJson)
+	// Build a protobuf ListValue directly from []any
+	listValue, err := structpb.NewList(metadataList)
 	if err != nil {
-		return &pb.DistinctMetadataForWindowType{}, fmt.Errorf(
-			"could not convert extracted metadata json (%v) to struct map:%v",
-			metadataJson,
-			err,
-		)
+		return nil, fmt.Errorf("could not convert metadata list to protobuf ListValue: %w", err)
 	}
+
 	return &pb.DistinctMetadataForWindowType{
-		Fields: metadataStructPb,
+		Metadata: listValue,
 	}, tx.Commit(ctx)
 }

@@ -332,7 +332,7 @@ class DistinctMetadataForWindowTypeRead(_message.Message):
     def __init__(self, time_from: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., time_to: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., window_type: _Optional[_Union[WindowType, _Mapping]] = ...) -> None: ...
 
 class DistinctMetadataForWindowType(_message.Message):
-    __slots__ = ("fields",)
-    FIELDS_FIELD_NUMBER: _ClassVar[int]
-    fields: _struct_pb2.Struct
-    def __init__(self, fields: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ...) -> None: ...
+    __slots__ = ("metadata",)
+    METADATA_FIELD_NUMBER: _ClassVar[int]
+    metadata: _struct_pb2.ListValue
+    def __init__(self, metadata: _Optional[_Union[_struct_pb2.ListValue, _Mapping]] = ...) -> None: ...
