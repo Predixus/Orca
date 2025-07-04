@@ -336,3 +336,28 @@ class DistinctMetadataForWindowType(_message.Message):
     METADATA_FIELD_NUMBER: _ClassVar[int]
     metadata: _struct_pb2.ListValue
     def __init__(self, metadata: _Optional[_Union[_struct_pb2.ListValue, _Mapping]] = ...) -> None: ...
+
+class WindowsForMetadataRead(_message.Message):
+    __slots__ = ("time_from", "time_to", "window", "metadata")
+    class Metadata(_message.Message):
+        __slots__ = ("field", "value")
+        FIELD_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        field: str
+        value: _struct_pb2.Value
+        def __init__(self, field: _Optional[str] = ..., value: _Optional[_Union[_struct_pb2.Value, _Mapping]] = ...) -> None: ...
+    TIME_FROM_FIELD_NUMBER: _ClassVar[int]
+    TIME_TO_FIELD_NUMBER: _ClassVar[int]
+    WINDOW_FIELD_NUMBER: _ClassVar[int]
+    METADATA_FIELD_NUMBER: _ClassVar[int]
+    time_from: _timestamp_pb2.Timestamp
+    time_to: _timestamp_pb2.Timestamp
+    window: WindowType
+    metadata: _containers.RepeatedCompositeFieldContainer[WindowsForMetadataRead.Metadata]
+    def __init__(self, time_from: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., time_to: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., window: _Optional[_Union[WindowType, _Mapping]] = ..., metadata: _Optional[_Iterable[_Union[WindowsForMetadataRead.Metadata, _Mapping]]] = ...) -> None: ...
+
+class WindowsForMetadata(_message.Message):
+    __slots__ = ("window",)
+    WINDOW_FIELD_NUMBER: _ClassVar[int]
+    window: _containers.RepeatedCompositeFieldContainer[Window]
+    def __init__(self, window: _Optional[_Iterable[_Union[Window, _Mapping]]] = ...) -> None: ...

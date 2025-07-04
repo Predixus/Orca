@@ -38,6 +38,10 @@ type (
 			ctx context.Context,
 			windowMetadataRead *pb.DistinctMetadataForWindowTypeRead,
 		) (*pb.DistinctMetadataForWindowType, error)
+		ReadWindowsForMetadata(
+			ctx context.Context,
+			windowsForMetadataRead *pb.WindowsForMetadataRead,
+		) (*pb.WindowsForMetadata, error)
 	}
 )
 

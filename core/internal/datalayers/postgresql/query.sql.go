@@ -943,6 +943,73 @@ func (q *Queries) ReadWindows(ctx context.Context, arg ReadWindowsParams) ([]Rea
 	return items, nil
 }
 
+const readWindowsForMetadata = `-- name: ReadWindowsForMetadata :many
+select
+  w.time_from,
+  w.time_to,
+  w.origin,
+  w.metadata,
+  wt.name,
+  wt.version
+from windows w
+join window_type wt on w.window_type_id =wt.id
+where
+	wt."name" = $1 and wt."version" = $2
+	and w.time_from  >= $3 and w.time_to <= $4
+	and w.metadata::jsonb @> $5::jsonb
+ORDER BY w.time_from, w.time_to ASC
+`
+
+type ReadWindowsForMetadataParams struct {
+	WindowTypeName    string
+	WindowTypeVersion string
+	TimeFrom          pgtype.Timestamp
+	TimeTo            pgtype.Timestamp
+	MetadataFilter    []byte
+}
+
+type ReadWindowsForMetadataRow struct {
+	TimeFrom pgtype.Timestamp
+	TimeTo   pgtype.Timestamp
+	Origin   string
+	Metadata []byte
+	Name     string
+	Version  string
+}
+
+func (q *Queries) ReadWindowsForMetadata(ctx context.Context, arg ReadWindowsForMetadataParams) ([]ReadWindowsForMetadataRow, error) {
+	rows, err := q.db.Query(ctx, readWindowsForMetadata,
+		arg.WindowTypeName,
+		arg.WindowTypeVersion,
+		arg.TimeFrom,
+		arg.TimeTo,
+		arg.MetadataFilter,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ReadWindowsForMetadataRow
+	for rows.Next() {
+		var i ReadWindowsForMetadataRow
+		if err := rows.Scan(
+			&i.TimeFrom,
+			&i.TimeTo,
+			&i.Origin,
+			&i.Metadata,
+			&i.Name,
+			&i.Version,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const registerWindow = `-- name: RegisterWindow :one
 WITH window_type_id AS (
   SELECT id FROM window_type 

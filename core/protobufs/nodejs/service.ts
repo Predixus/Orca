@@ -20,7 +20,7 @@ import {
   type ServiceError,
   type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
-import { ListValue, Struct } from "./google/protobuf/struct";
+import { ListValue, Struct, Value } from "./google/protobuf/struct";
 import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "";
@@ -648,6 +648,31 @@ export interface DistinctMetadataForWindowTypeRead {
 
 export interface DistinctMetadataForWindowType {
   metadata?: Array<any> | undefined;
+}
+
+export interface WindowsForMetadataRead {
+  /** the time to read windows from */
+  timeFrom?:
+    | Date
+    | undefined;
+  /** the time to read windows to */
+  timeTo?:
+    | Date
+    | undefined;
+  /** the window */
+  window?: WindowType | undefined;
+  metadata?: WindowsForMetadataRead_Metadata[] | undefined;
+}
+
+/** the metadata */
+export interface WindowsForMetadataRead_Metadata {
+  field?: string | undefined;
+  value?: any | undefined;
+}
+
+export interface WindowsForMetadata {
+  /** the windows */
+  window?: Window[] | undefined;
 }
 
 function createBaseWindow(): Window {
@@ -3530,6 +3555,266 @@ export const DistinctMetadataForWindowType: MessageFns<DistinctMetadataForWindow
   },
 };
 
+function createBaseWindowsForMetadataRead(): WindowsForMetadataRead {
+  return { timeFrom: undefined, timeTo: undefined, window: undefined, metadata: [] };
+}
+
+export const WindowsForMetadataRead: MessageFns<WindowsForMetadataRead> = {
+  encode(message: WindowsForMetadataRead, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.timeFrom !== undefined) {
+      Timestamp.encode(toTimestamp(message.timeFrom), writer.uint32(10).fork()).join();
+    }
+    if (message.timeTo !== undefined) {
+      Timestamp.encode(toTimestamp(message.timeTo), writer.uint32(18).fork()).join();
+    }
+    if (message.window !== undefined) {
+      WindowType.encode(message.window, writer.uint32(26).fork()).join();
+    }
+    if (message.metadata !== undefined && message.metadata.length !== 0) {
+      for (const v of message.metadata) {
+        WindowsForMetadataRead_Metadata.encode(v!, writer.uint32(34).fork()).join();
+      }
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WindowsForMetadataRead {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWindowsForMetadataRead();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.timeFrom = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.timeTo = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.window = WindowType.decode(reader, reader.uint32());
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          const el = WindowsForMetadataRead_Metadata.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.metadata!.push(el);
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WindowsForMetadataRead {
+    return {
+      timeFrom: isSet(object.timeFrom) ? fromJsonTimestamp(object.timeFrom) : undefined,
+      timeTo: isSet(object.timeTo) ? fromJsonTimestamp(object.timeTo) : undefined,
+      window: isSet(object.window) ? WindowType.fromJSON(object.window) : undefined,
+      metadata: globalThis.Array.isArray(object?.metadata)
+        ? object.metadata.map((e: any) => WindowsForMetadataRead_Metadata.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: WindowsForMetadataRead): unknown {
+    const obj: any = {};
+    if (message.timeFrom !== undefined) {
+      obj.timeFrom = message.timeFrom.toISOString();
+    }
+    if (message.timeTo !== undefined) {
+      obj.timeTo = message.timeTo.toISOString();
+    }
+    if (message.window !== undefined) {
+      obj.window = WindowType.toJSON(message.window);
+    }
+    if (message.metadata?.length) {
+      obj.metadata = message.metadata.map((e) => WindowsForMetadataRead_Metadata.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<WindowsForMetadataRead>, I>>(base?: I): WindowsForMetadataRead {
+    return WindowsForMetadataRead.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<WindowsForMetadataRead>, I>>(object: I): WindowsForMetadataRead {
+    const message = createBaseWindowsForMetadataRead();
+    message.timeFrom = object.timeFrom ?? undefined;
+    message.timeTo = object.timeTo ?? undefined;
+    message.window = (object.window !== undefined && object.window !== null)
+      ? WindowType.fromPartial(object.window)
+      : undefined;
+    message.metadata = object.metadata?.map((e) => WindowsForMetadataRead_Metadata.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseWindowsForMetadataRead_Metadata(): WindowsForMetadataRead_Metadata {
+  return { field: "", value: undefined };
+}
+
+export const WindowsForMetadataRead_Metadata: MessageFns<WindowsForMetadataRead_Metadata> = {
+  encode(message: WindowsForMetadataRead_Metadata, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.field !== undefined && message.field !== "") {
+      writer.uint32(10).string(message.field);
+    }
+    if (message.value !== undefined) {
+      Value.encode(Value.wrap(message.value), writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WindowsForMetadataRead_Metadata {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWindowsForMetadataRead_Metadata();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.field = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = Value.unwrap(Value.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WindowsForMetadataRead_Metadata {
+    return {
+      field: isSet(object.field) ? globalThis.String(object.field) : "",
+      value: isSet(object?.value) ? object.value : undefined,
+    };
+  },
+
+  toJSON(message: WindowsForMetadataRead_Metadata): unknown {
+    const obj: any = {};
+    if (message.field !== undefined && message.field !== "") {
+      obj.field = message.field;
+    }
+    if (message.value !== undefined) {
+      obj.value = message.value;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<WindowsForMetadataRead_Metadata>, I>>(base?: I): WindowsForMetadataRead_Metadata {
+    return WindowsForMetadataRead_Metadata.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<WindowsForMetadataRead_Metadata>, I>>(
+    object: I,
+  ): WindowsForMetadataRead_Metadata {
+    const message = createBaseWindowsForMetadataRead_Metadata();
+    message.field = object.field ?? "";
+    message.value = object.value ?? undefined;
+    return message;
+  },
+};
+
+function createBaseWindowsForMetadata(): WindowsForMetadata {
+  return { window: [] };
+}
+
+export const WindowsForMetadata: MessageFns<WindowsForMetadata> = {
+  encode(message: WindowsForMetadata, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.window !== undefined && message.window.length !== 0) {
+      for (const v of message.window) {
+        Window.encode(v!, writer.uint32(10).fork()).join();
+      }
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WindowsForMetadata {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWindowsForMetadata();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          const el = Window.decode(reader, reader.uint32());
+          if (el !== undefined) {
+            message.window!.push(el);
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WindowsForMetadata {
+    return {
+      window: globalThis.Array.isArray(object?.window) ? object.window.map((e: any) => Window.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: WindowsForMetadata): unknown {
+    const obj: any = {};
+    if (message.window?.length) {
+      obj.window = message.window.map((e) => Window.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<WindowsForMetadata>, I>>(base?: I): WindowsForMetadata {
+    return WindowsForMetadata.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<WindowsForMetadata>, I>>(object: I): WindowsForMetadata {
+    const message = createBaseWindowsForMetadata();
+    message.window = object.window?.map((e) => Window.fromPartial(e)) || [];
+    return message;
+  },
+};
+
 /**
  * OrcaCore is the central orchestration service that:
  * - Manages the lifecycle of processing windows
@@ -3637,6 +3922,16 @@ export const OrcaCoreService = {
       Buffer.from(DistinctMetadataForWindowType.encode(value).finish()),
     responseDeserialize: (value: Buffer): DistinctMetadataForWindowType => DistinctMetadataForWindowType.decode(value),
   },
+  readWindowsForMetadata: {
+    path: "/OrcaCore/ReadWindowsForMetadata",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: WindowsForMetadataRead): Buffer =>
+      Buffer.from(WindowsForMetadataRead.encode(value).finish()),
+    requestDeserialize: (value: Buffer): WindowsForMetadataRead => WindowsForMetadataRead.decode(value),
+    responseSerialize: (value: WindowsForMetadata): Buffer => Buffer.from(WindowsForMetadata.encode(value).finish()),
+    responseDeserialize: (value: Buffer): WindowsForMetadata => WindowsForMetadata.decode(value),
+  },
 } as const;
 
 export interface OrcaCoreServer extends UntypedServiceImplementation {
@@ -3653,6 +3948,7 @@ export interface OrcaCoreServer extends UntypedServiceImplementation {
   readResultsForAlgorithm: handleUnaryCall<ResultsForAlgorithmRead, ResultsForAlgorithm>;
   readWindows: handleUnaryCall<WindowsRead, Windows>;
   readDistinctMetadataForWindowType: handleUnaryCall<DistinctMetadataForWindowTypeRead, DistinctMetadataForWindowType>;
+  readWindowsForMetadata: handleUnaryCall<WindowsForMetadataRead, WindowsForMetadata>;
 }
 
 export interface OrcaCoreClient extends Client {
@@ -3805,6 +4101,21 @@ export interface OrcaCoreClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: DistinctMetadataForWindowType) => void,
+  ): ClientUnaryCall;
+  readWindowsForMetadata(
+    request: WindowsForMetadataRead,
+    callback: (error: ServiceError | null, response: WindowsForMetadata) => void,
+  ): ClientUnaryCall;
+  readWindowsForMetadata(
+    request: WindowsForMetadataRead,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: WindowsForMetadata) => void,
+  ): ClientUnaryCall;
+  readWindowsForMetadata(
+    request: WindowsForMetadataRead,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: WindowsForMetadata) => void,
   ): ClientUnaryCall;
 }
 
