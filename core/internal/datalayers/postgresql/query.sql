@@ -236,13 +236,6 @@ WHERE
   AND wt.name = sqlc.arg('window_type_name')
   AND wt.version = sqlc.arg('window_type_version');
 
--- name: ReadResultsForWindowMetadataField :many
-select r.* from results r
-join windows w on r.windows_id = w.id
-where
-	w.time_from  >= sql.arg('time_from') and w.time_to <= sqlc.arg('time_to')
-	and (w.metadata::json->>sqlc.arg('metadata_field')) = sqlc.arg('metadata_field_match');
-
 -- name: ReadResultsForAlgorithm :many
 select
   w.time_from,
@@ -306,4 +299,25 @@ where
 	wt."name" = sqlc.arg('window_type_name') and wt."version" = sqlc.arg('window_type_version')
 	and w.time_from  >= sqlc.arg('time_from') and w.time_to <= sqlc.arg('time_to')
 	and w.metadata::jsonb @> sqlc.arg('metadata_filter')::jsonb
+ORDER BY w.time_from, w.time_to ASC;
+
+
+-- name: ReadResultsForAlgorithmAndMetadata :many
+select
+  w.time_from,
+  w.time_to,
+  a."name",
+  a."version",
+  r.result_value, 
+  r.result_array,
+  r.result_json
+from windows w
+join window_type wt on w.window_type_id = wt.id
+join results r on r.window_type_id = wt.id
+join algorithm a on a.id = r.algorithm_id
+where
+	wt."name" = sqlc.arg('window_type_name') and wt."version" = sqlc.arg('window_type_version')
+	and w.time_from  >= sqlc.arg('time_from') and w.time_to <= sqlc.arg('time_to')
+	and w.metadata::jsonb @> sqlc.arg('metadata_filter')::jsonb
+	and a."name" = sqlc.arg('algorithm_name') and a."version" = sqlc.arg('algorithm_version')
 ORDER BY w.time_from, w.time_to ASC;
