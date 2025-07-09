@@ -779,21 +779,23 @@ func (q *Queries) ReadResultsForAlgorithm(ctx context.Context, arg ReadResultsFo
 }
 
 const readResultsForAlgorithmAndMetadata = `-- name: ReadResultsForAlgorithmAndMetadata :many
-select
+WITH algorithmId AS (
+  SELECT id FROM algorithm WHERE name = $4 AND version = $5
+)
+SELECT
   w.time_from,
   w.time_to,
-  a."name",
-  a."version",
-  r.result_value, 
+  w.metadata,
+  r.result_value,
   r.result_array,
   r.result_json
-from windows w
-join results r on r.window_type_id = w.window_type_id
-join algorithm a on a.id = r.algorithm_id
-where
-  w.time_from  >= $1 and w.time_to <= $2
-	and w.metadata::jsonb @> $3::jsonb
-	and a."name" = $4 and a."version" = $5
+FROM results r
+JOIN windows w ON r.windows_id  = w.id
+WHERE
+  w.time_from >= $1 AND
+  w.time_to <= $2 AND
+  w.metadata::jsonb @> $3::jsonb AND
+  r.algorithm_id = (SELECT id FROM algorithmId)
 ORDER BY w.time_from, w.time_to ASC
 `
 
@@ -808,8 +810,7 @@ type ReadResultsForAlgorithmAndMetadataParams struct {
 type ReadResultsForAlgorithmAndMetadataRow struct {
 	TimeFrom    pgtype.Timestamp
 	TimeTo      pgtype.Timestamp
-	Name        string
-	Version     string
+	Metadata    []byte
 	ResultValue pgtype.Float8
 	ResultArray []float64
 	ResultJson  []byte
@@ -833,8 +834,7 @@ func (q *Queries) ReadResultsForAlgorithmAndMetadata(ctx context.Context, arg Re
 		if err := rows.Scan(
 			&i.TimeFrom,
 			&i.TimeTo,
-			&i.Name,
-			&i.Version,
+			&i.Metadata,
 			&i.ResultValue,
 			&i.ResultArray,
 			&i.ResultJson,
