@@ -312,12 +312,10 @@ select
   r.result_array,
   r.result_json
 from windows w
-join window_type wt on w.window_type_id = wt.id
-join results r on r.window_type_id = wt.id
+join results r on r.window_type_id = w.window_type_id
 join algorithm a on a.id = r.algorithm_id
 where
-	wt."name" = sqlc.arg('window_type_name') and wt."version" = sqlc.arg('window_type_version')
-	and w.time_from  >= sqlc.arg('time_from') and w.time_to <= sqlc.arg('time_to')
+  w.time_from  >= sqlc.arg('time_from') and w.time_to <= sqlc.arg('time_to')
 	and w.metadata::jsonb @> sqlc.arg('metadata_filter')::jsonb
 	and a."name" = sqlc.arg('algorithm_name') and a."version" = sqlc.arg('algorithm_version')
 ORDER BY w.time_from, w.time_to ASC;

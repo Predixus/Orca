@@ -788,25 +788,21 @@ select
   r.result_array,
   r.result_json
 from windows w
-join window_type wt on w.window_type_id = wt.id
-join results r on r.window_type_id = wt.id
+join results r on r.window_type_id = w.window_type_id
 join algorithm a on a.id = r.algorithm_id
 where
-	wt."name" = $1 and wt."version" = $2
-	and w.time_from  >= $3 and w.time_to <= $4
-	and w.metadata::jsonb @> $5::jsonb
-	and a."name" = $6 and a."version" = $7
+  w.time_from  >= $1 and w.time_to <= $2
+	and w.metadata::jsonb @> $3::jsonb
+	and a."name" = $4 and a."version" = $5
 ORDER BY w.time_from, w.time_to ASC
 `
 
 type ReadResultsForAlgorithmAndMetadataParams struct {
-	WindowTypeName    string
-	WindowTypeVersion string
-	TimeFrom          pgtype.Timestamp
-	TimeTo            pgtype.Timestamp
-	MetadataFilter    []byte
-	AlgorithmName     string
-	AlgorithmVersion  string
+	TimeFrom         pgtype.Timestamp
+	TimeTo           pgtype.Timestamp
+	MetadataFilter   []byte
+	AlgorithmName    string
+	AlgorithmVersion string
 }
 
 type ReadResultsForAlgorithmAndMetadataRow struct {
@@ -821,8 +817,6 @@ type ReadResultsForAlgorithmAndMetadataRow struct {
 
 func (q *Queries) ReadResultsForAlgorithmAndMetadata(ctx context.Context, arg ReadResultsForAlgorithmAndMetadataParams) ([]ReadResultsForAlgorithmAndMetadataRow, error) {
 	rows, err := q.db.Query(ctx, readResultsForAlgorithmAndMetadata,
-		arg.WindowTypeName,
-		arg.WindowTypeVersion,
 		arg.TimeFrom,
 		arg.TimeTo,
 		arg.MetadataFilter,

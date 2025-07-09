@@ -733,8 +733,6 @@ func (d *Datalayer) ReadResultsForAlgorithmAndMetadata(
 	}
 
 	rows, err := qtx.ReadResultsForAlgorithmAndMetadata(ctx, ReadResultsForAlgorithmAndMetadataParams{
-    WindowTypeName: resultsForAlgorithmAndMetadata.GetAlgorithm().GetWindowType().GetName(),
-    WindowTypeVersion: resultsForAlgorithmAndMetadata.GetAlgorithm().GetWindowType().GetVersion(),
     TimeFrom: pgtype.Timestamp{
       Time: resultsForAlgorithmAndMetadata.GetTimeFrom().AsTime(),
       Valid:true,
