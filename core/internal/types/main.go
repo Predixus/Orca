@@ -46,6 +46,7 @@ type (
 			ctx context.Context,
 			windowsForMetadataRead *pb.WindowsForMetadataRead,
 		) (*pb.WindowsForMetadata, error)
+  Annotate
 	}
 )
 

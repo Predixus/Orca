@@ -178,5 +178,5 @@ func (o *OrcaCoreServer) Annotate(
 	ctx context.Context,
 	annotateWrite *pb.AnnotateWrite,
 ) (*pb.AnnotateResponse, error) {
-	o.client.Annotate(ctx, annotateWrite)
+	o.client.WithTx(ctx, annotateWrite)
 }
